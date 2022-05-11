@@ -5,7 +5,7 @@ import time
 import argparse
 from pathlib import Path
 import concurrent.futures
-from os.path import abspath, join
+from os.path import abspath, join, basename
 
 # External libraries
 import numpy as np
@@ -41,6 +41,14 @@ def get_options():
 
 
 def im_min_max_scaler(im, minmaxrange=(0, 1)):
+    """
+    Min-Max scaling to a given image (one channel only).
+    It's possible to specify the desired range (default 0 to 1).
+
+    :param im: Single channel image/array (Numpy, opencv, scikit-image compatible)
+    :param minmaxrange: New range of values, by default 0 to 1
+    :return: Scaled image in the specified range
+    """
     # Unpack value range
     min, max = minmaxrange
 
@@ -54,6 +62,16 @@ def im_min_max_scaler(im, minmaxrange=(0, 1)):
 
 
 def get_single_cell_coordinates(mask, cellid, expansion=10):
+    """
+    This function gets the mask bounding box from a specific cellID.
+    The field of view can be increased if required with the expansion parameters.
+
+    :param mask: tif image with nuclear/cell segmentation
+    :param cellid: ID of the cell you want the bounding box.
+    :param expansion: Amount of pixels added to the bounding box to each side.
+    :return: Coordinates on mask file of the single cell/single nuclei bounding box
+    """
+
     # Focus on one cell at a time
     singlecell = mask == cellid
 
@@ -72,6 +90,13 @@ def get_single_cell_coordinates(mask, cellid, expansion=10):
 
 
 def pad_image(im, size):
+    """
+    Inserts an image at the center of a black canvas.
+
+    :param im: image to insert.
+    :param size: Canvas size.
+    :return: Canvas with inserted image.
+    """
     # Create empy array of the desired size
     black = np.zeros(size)
 
@@ -90,7 +115,32 @@ def pad_image(im, size):
     return black
 
 
-def main(args)
+def main(args):
+    # Load image, and mask
+    image = io.imread(args.image)
+    mask = io.imread(args.mask)
+
+    # Iterate over each cell in the mask and get single cell bounding boxes sc_bb
+    # CellIDs start from 1 that's why I used range from 1 to n+1
+    # Doing this cell by cell since it can be easily parallelized
+    mask_sc_bb = [get_single_cell_coordinates(mask, i, expansion=50) for i in range(1, mask.max() + 1)]
+
+    # We now iterate over each predicted bounding box
+    for cellid, coord in enumerate(mask_sc_bb):
+        x1, x2, y1, y2 = coord
+
+        # Get single cell
+        sc = image[x1:x2, y1:y2]
+
+        # Scale image
+        sc = im_min_max_scaler(sc, minmaxrange=(0, 255))
+
+        # Pad image
+        sc = pad_image(sc, (512, 512))
+
+        # Save SC image
+        cv2.imwrite(join(args.out, f"{basename(args.image)}_{cellid}.png"), sc)
+
 
 if __name__ == '__main__':
     main()
