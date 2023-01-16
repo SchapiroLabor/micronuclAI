@@ -51,6 +51,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .nextflow*
+.DS_store
+.idea
 
 # Translations
 *.mo
