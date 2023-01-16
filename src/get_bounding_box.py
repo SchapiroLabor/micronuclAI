@@ -1,17 +1,14 @@
 # Built in libraries
-import os
-import sys
 import time
 import argparse
 from pathlib import Path
-import concurrent.futures
-from os.path import abspath, join, basename
+from skimage import exposure, transform
+# from aicsimageio import AICSImage
 
 # External libraries
 import numpy as np
-import pandas as pd
 from skimage import io
-import cv2
+
 
 def get_options():
     # Script description
@@ -24,7 +21,16 @@ def get_options():
     input = parser.add_argument_group(title="Input")
     input.add_argument("-i", "--image", dest="image", action="store", required=True, help="Pathway to input image.")
     input.add_argument("-m", "--mask", dest="mask", action="store", required=True, help="Pathway to mask segmentation.")
-    input.add_argument("-c", "--channel", dest="channel", action="store", required=True, help="DAPI channel.")
+    input.add_argument("-c", "--channel", dest="channel", action="store", required=False, help="DAPI channel.")
+
+    # Tool options
+    options = parser.add_argument_group(title="Options")
+    options.add_argument("-e", "--expansion", dest="expansion", action="store", required=False, default="50", type=int,
+                         help="Number of pixels to expand each cell bounding box, field of view of each cell "
+                              "[default = 50]")
+    options.add_argument("-fs", "--final-size", dest="fsize", action="store", required=False, default=256, type=int,
+                         help="Final desired size of the isolated nuclei, they will be squared. [default=256].")
+    # TODO: Add toggle option for cells from the edge
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -34,8 +40,9 @@ def get_options():
     args = parser.parse_args()
 
     # Standardize paths
-    args.data = abspath(args.data)
-    args.out = abspath(args.out)
+    args.image = Path(args.image).resolve()
+    args.mask = Path(args.mask).resolve()
+    args.out = Path(args.out).resolve()
 
     return args
 
@@ -61,7 +68,7 @@ def im_min_max_scaler(im, minmaxrange=(0, 1)):
     return im
 
 
-def get_single_cell_coordinates(mask, cellid, expansion=10):
+def get_single_cell_coordinates(mask, cellid, expansion):
     """
     This function gets the mask bounding box from a specific cellID.
     The field of view can be increased if required with the expansion parameters.
@@ -76,7 +83,7 @@ def get_single_cell_coordinates(mask, cellid, expansion=10):
     singlecell = mask == cellid
 
     # Get non-zero coordinates for x and y
-    x,y = np.nonzero(singlecell)
+    x, y = np.nonzero(singlecell)
 
     # Carefully expand the coordinates, we can not have coordinates less than 0
     # and we can not have coordinates greater than the size of the image
@@ -86,7 +93,7 @@ def get_single_cell_coordinates(mask, cellid, expansion=10):
     y2 = y.max()+expansion if y.max()+expansion < mask.shape[1] else mask.shape[1]
 
     # Return coordinates for the cell with expansion
-    return x1, x2, y1, y2
+    return np.array([x1, x2, y1, y2])
 
 
 def pad_image(im, size):
@@ -100,8 +107,7 @@ def pad_image(im, size):
     # Create empy array of the desired size
     black = np.zeros(size)
 
-    # Check if im size is smaller than desired size
-    # TODO: Handle the case when is not
+    # Check if im size is smaller than desired size, prefer to use resize to handle cases where this is not true
     if im.shape[0] < black.shape[0] and im.shape[1] < black.shape[1]:
 
         # Calculate the difference between im and size
@@ -115,6 +121,43 @@ def pad_image(im, size):
     return black
 
 
+def resize(im, size):
+    """
+    Makes an image square to a desire size without changing the ratio
+
+    :param im: Image to pad
+    :param size: Final desired size
+    :return: Image of the desired sized, with added padding where needed
+    """
+    ox = im.shape[0]
+    oy = im.shape[1]
+
+    # Get the difference between the current size and the desired size
+    dif_x = size[0] - im.shape[0]
+    dif_y = size[1] - im.shape[1]
+
+    # Getting the difference for each size of the image
+    dif_x1 = dif_x//2
+    dif_x2 = dif_x//2 + dif_x % 2
+    dif_y1 = dif_y//2
+    dif_y2 = dif_y//2 + dif_y % 2
+    difs = np.array([dif_x1, dif_x2, dif_y1, dif_y2])
+
+    # Get crop differences
+    dif_crop = np.where(difs < 0, -difs, 0)
+
+    # Get pad differences
+    dif_pad = np.where(difs >= 0, difs, 0)
+
+    # Remove pixels from image if difference is negative
+    im = im[0+dif_crop[0]:ox-dif_crop[1], 0+dif_crop[2]:oy-dif_crop[3]]
+
+    # Assuming the image is smaller than the desired size
+    im = np.pad(im, [(dif_pad[0], dif_pad[1]), (dif_pad[2], dif_pad[3])], mode="constant")
+
+    return im
+
+
 def main(args):
     # Load image, and mask
     image = io.imread(args.image)
@@ -123,24 +166,46 @@ def main(args):
     # Iterate over each cell in the mask and get single cell bounding boxes sc_bb
     # CellIDs start from 1 that's why I used range from 1 to n+1
     # Doing this cell by cell since it can be easily parallelized
-    mask_sc_bb = [get_single_cell_coordinates(mask, i, expansion=50) for i in range(1, mask.max() + 1)]
+    mask_sc_bb = [get_single_cell_coordinates(mask, i, expansion=args.expansion) for i in range(1, mask.max() + 1)]
+    # mask_sc_bb = [get_single_cell_coordinates(mask, i) for i in range(1, mask.max() + 1)]
 
     # We now iterate over each predicted bounding box
     for cellid, coord in enumerate(mask_sc_bb):
+        # Get the coordinates of the bounding box for each cell mask
         x1, x2, y1, y2 = coord
 
-        # Get single cell
+        # Remove cells from the edge
+        if any(coord == 0) or any(coord == mask.shape[0]) or any(coord == mask.shape[1]):
+            print(f"{args.image.name} cell {cellid} removed: edge")
+            continue
+
+        # Remove cells if they re bellow a certain threshold
+        x_min_lim = 150
+        y_min_lim = 150
+        if (x2-x1) < x_min_lim and (y2-y1) < y_min_lim:
+            print(f"{args.image.name} cell {cellid} removed: small")
+            continue
+
+        # Get single cell image data
         sc = image[x1:x2, y1:y2]
 
-        # Scale image
-        sc = im_min_max_scaler(sc, minmaxrange=(0, 255))
+        # Pad/Crop image tp the desired size
+        sc = resize(sc, size=(args.fsize, args.fsize))
 
-        # Pad image
-        sc = pad_image(sc, (512, 512))
+        # Scale image to 8bit for jpeg transform
+        sc = exposure.rescale_intensity(sc, out_range=(0, 255)).astype(np.uint8)
 
         # Save SC image
-        cv2.imwrite(join(args.out, f"{basename(args.image)}_{cellid}.png"), sc)
+        args.out.mkdir(parents=True, exist_ok=True)
+        io.imsave(str(args.out.joinpath(f"{args.image.name.split('.')[0]}_{cellid}.png")), sc)
 
 
 if __name__ == '__main__':
-    main()
+    # Get arguments
+    args = get_options()
+
+    # Run script
+    st = time.time()
+    main(args)
+    rt = time.time() - st
+    print(f"Script finish in {rt//60:.0f}m {rt%60:.0f}s")
