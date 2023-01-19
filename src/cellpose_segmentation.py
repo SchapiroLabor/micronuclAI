@@ -1,5 +1,7 @@
 import argparse
 from pathlib import Path
+
+import torch
 from cellpose import models
 from skimage import io
 import time
@@ -20,7 +22,9 @@ def get_args():
     input.add_argument("-i", "--image", dest="image", action="store", required=True, help="Pathway to input image.")
     input.add_argument("-c", "--channels", dest="channels", action="store", type=int, nargs="+", required=True,
                        help="List of channels used for segmentation of length 2. "
-                            "2nd element  https://cellpose.readthedocs.io/en/latest/settings.htmlf")
+                            "2nd element  https://cellpose.readthedocs.io/en/latest/settings.html")
+    input.add_argument("-g", "--gpu", dest="gpu", action="store_true", default=False, required=False,
+                       help="Use gpu for inference acceleration.")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -39,12 +43,15 @@ def get_args():
 
 def main(args):
     # Load model
-    model = models.Cellpose(model_type='nuclei')
+    print(f"Loading Model with gpu: {args.gpu}")
+    model = models.Cellpose(model_type='nuclei', gpu=args.gpu)
 
     # Read in data, it most be contained in a list object for evaluation
-    img = [io.imread(args.image)]
+    print("Reading image")
+    img = io.imread(args.image)
 
     # Predict nuclei in image
+    print("Predicting")
     masks, flows, styles, diams = model.eval(img, channels=args.channels, diameter=None)
 
     # Create output folder if it does not exist
