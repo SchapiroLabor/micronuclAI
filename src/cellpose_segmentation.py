@@ -1,11 +1,7 @@
 import argparse
-import os
-import pickle
 from pathlib import Path
 from cellpose import models
-from cellpose.io import imread as cp_imread
 from skimage import io
-import numpy as np
 import time
 
 
