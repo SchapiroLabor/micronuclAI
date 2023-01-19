@@ -1,5 +1,6 @@
 import pickle
 import torch
+import time
 from pathlib import Path
 import torch.nn as nn
 import torchvision
@@ -15,14 +16,44 @@ from models import (EfficientNetClassifier, BinaryClassifierModel)
 from utils import evaluate_binary_model
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
+import argparse
 
 
-def main():
+def get_args():
+    # Script description
+    description = """Use EfficientNet to train a classifier"""
+
+    # Add parser
+    parser = argparse.ArgumentParser(description)
+
+    # Tool Input
+    input = parser.add_argument_group(title="Inputs")
+    input.add_argument("-i", "--images", dest="images", action="store", required=True,
+                       help="Pathway to input image folder.")
+    input.add_argument("-l", "--labels", dest="labels", action="store", required=True,
+                       help="Pathway to label file.")
+
+    # Tool output
+    output = parser.add_argument_group(title="Output")
+    output.add_argument("-o", "--out", dest="out", action="store", required=True,
+                        help="Pathway to results folder.")
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Standardize paths
+    args.images = Path(args.images).resolve()
+    args.labels = Path(args.labels).resolve()
+    args.out = Path(args.out).resolve()
+
+    return args
+
+def main(args):
     image_size = 256
 
     transform = {
         "train": torchvision.transforms.Compose([
-            torchvision.transforms.Resize((image_size, image_size), interpolation=2),
+            torchvision.transforms.Resize((image_size, image_size)),
             transforms.RandomHorizontalFlip(),
             torchvision.transforms.RandomVerticalFlip(),
             torchvision.transforms.RandomRotation(degrees=30),
@@ -33,7 +64,7 @@ def main():
                                              std=[0.229, 0.224, 0.225])
         ]),
         "val": torchvision.transforms.Compose([
-            torchvision.transforms.Resize((image_size, image_size), interpolation=2),
+            torchvision.transforms.Resize((image_size, image_size)),
             torchvision.transforms.Grayscale(num_output_channels=3),
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -41,12 +72,10 @@ def main():
         ])
     }
 
-    # Set pathwats
-    IMAGES_ROOT = Path("/Users/miguelibarra/PycharmProjects/cin/data/isonuc_original_labeled")
-    LABELS_FILE = Path("/Users/miguelibarra/PycharmProjects/cin/labels/labels_binary_lidsay_complete_clean.csv")
-    RESULTS_FOLDER = Path("/Users/miguelibarra/PycharmProjects/cin/model_train_results")
-
-
+    # Set pathways
+    IMAGES_ROOT = args.images
+    LABELS_FILE = args.labels
+    RESULTS_FOLDER = args.out
 
     # Create two dataset objects with different transformations (to not have augmentations in validation and test set later)
     data_train = CINDataset(csv_path=LABELS_FILE, images_folder=IMAGES_ROOT, transform=transform["train"])
@@ -57,10 +86,10 @@ def main():
                                                        stratify=data_train.df["label"], random_state=42)
 
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    k = 1
+    #k = 1
 
-    for train_indices, val_indices in skf.split(data_train.df["image"].loc[train_val_indices],
-                                                data_train.df["label"].loc[train_val_indices]):
+    for k, (train_indices, val_indices) in enumerate(skf.split(data_train.df["image"].loc[train_val_indices],
+                                                data_train.df["label"].loc[train_val_indices])):
         # Oversample/ undersample training set due to class imbalance
         sampling_number = len(train_indices)
         df_tmp = data_train.df.loc[train_indices].groupby("label").sample(n=sampling_number, replace=True)
@@ -101,7 +130,7 @@ def main():
 
         dict_test_evaluation = evaluate_binary_model(test_scores, test_labels)
         df_test_evaluation = pd.DataFrame.from_dict(dict_test_evaluation)
-        RESULTS_FILE = RESULTS_FOLDER.joinpath(f"test_evalutation_scores_{str(k)}.csv")
+        RESULTS_FILE = RESULTS_FOLDER.joinpath(f"test_evaluation_scores_{str(k)}.csv")
         RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
         df_test_evaluation.to_csv(RESULTS_FILE, index=False)
 
@@ -109,8 +138,15 @@ def main():
         MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
         torch.save(model, MODEL_FILE)
 
-        k += 1
+        #k += 1
 
 
 if __name__ == "__main__":
-    main()
+    # Read arguments from command line
+    args = get_args()
+
+    # Run script and calculate run time
+    st = time.time()
+    main(args)
+    rt = time.time() - st
+    print(f"Script finish in {rt//60:.0f}m {rt%60:.0f}s")

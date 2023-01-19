@@ -3,7 +3,7 @@ import time
 import argparse
 from pathlib import Path
 from skimage import exposure, transform
-# from aicsimageio import AICSImage
+from aicsimageio import AICSImage
 
 # External libraries
 import numpy as np
@@ -25,13 +25,19 @@ def get_options():
 
     # Tool options
     options = parser.add_argument_group(title="Options")
-    options.add_argument("-e", "--expansion", dest="expansion", action="store", required=False, default="50", type=int,
+    options.add_argument("-fv", "--field-view", dest="field_view", action="store", required=False, default="50", type=int,
                          help="Number of pixels to expand each cell bounding box, field of view of each cell "
                               "[default = 50]")
     options.add_argument("-fs", "--final-size", dest="fsize", action="store", required=False, default=256, type=int,
                          help="Final desired size of the isolated nuclei, they will be squared. [default=256].")
-    # TODO: Add toggle option for cells from the edge
-
+    options.add_argument("-re", "--remove-edge", dest="remove_edge", action="store_true", required=False, default=False,
+                         help="Flag to remove cells that lay on the edge of the image.")
+    options.add_argument("-s", "--scaling-factor", dest="scaling_factor", action="store", required=False, default=None,
+                         type=float, help="Scaling factor values < 1 make image smaller, >0 make it big [default=None]")
+    options.add_argument("-xms", "--x-min-size", dest="x_min_size", action="store", required=False, default=0, type=int,
+                         help="Limit for the minimum size required for the x axis in an image.")
+    options.add_argument("-yms", "--y-min-size", dest="y_min_size", action="store", required=False, default=0, type=int,
+                         help="Limit for the minimum size required for the y axis in an image.")
     # Tool output
     output = parser.add_argument_group(title="Output")
     output.add_argument("-o", "--out", dest="out", action="store", required=True, help="Path to the output data folder")
@@ -39,7 +45,7 @@ def get_options():
     # Parse arguments
     args = parser.parse_args()
 
-    # Standardize paths
+    # Stan dardize paths
     args.image = Path(args.image).resolve()
     args.mask = Path(args.mask).resolve()
     args.out = Path(args.out).resolve()
@@ -159,35 +165,47 @@ def resize(im, size):
 
 
 def main(args):
+    # Parameters
+    print(f"Removing cells in edges = {args.remove_edge}")
+    print(f"Removing X minimum size = {args.x_min_size}")
+    print(f"Removing Y minimum size = {args.y_min_size}")
+    print(f"Using scalling factor   = {args.scaling_factor}")
+
     # Load image, and mask
-    image = io.imread(args.image)
-    mask = io.imread(args.mask)
+    #image = io.imread(args.image)
+    image = AICSImage(args.image, C=args.channel).get_image_data("YX")
+    mask = AICSImage(args.mask).get_image_data("YX")
+    print(f"Image shape = {image.shape}")
+    print(f"Mask shape  = {mask.shape}")
 
     # Iterate over each cell in the mask and get single cell bounding boxes sc_bb
     # CellIDs start from 1 that's why I used range from 1 to n+1
     # Doing this cell by cell since it can be easily parallelized
-    mask_sc_bb = [get_single_cell_coordinates(mask, i, expansion=args.expansion) for i in range(1, mask.max() + 1)]
-    # mask_sc_bb = [get_single_cell_coordinates(mask, i) for i in range(1, mask.max() + 1)]
+    print("Getting bounding boxes")
+    mask_sc_bb = [get_single_cell_coordinates(mask, i, expansion=args.field_view) for i in range(1, mask.max() + 1)]
 
     # We now iterate over each predicted bounding box
+    print("Expanding bounding box and save")
     for cellid, coord in enumerate(mask_sc_bb):
         # Get the coordinates of the bounding box for each cell mask
         x1, x2, y1, y2 = coord
 
         # Remove cells from the edge
-        if any(coord == 0) or any(coord == mask.shape[0]) or any(coord == mask.shape[1]):
+        if args.remove_edge and (any(coord == 0) or any(coord == mask.shape[0]) or any(coord == mask.shape[1])):
             print(f"{args.image.name} cell {cellid} removed: edge")
             continue
 
         # Remove cells if they re bellow a certain threshold
-        x_min_lim = 150
-        y_min_lim = 150
-        if (x2-x1) < x_min_lim and (y2-y1) < y_min_lim:
+        if (x2-x1) < args.x_min_size and (y2-y1) < args.y_min_size:
             print(f"{args.image.name} cell {cellid} removed: small")
             continue
 
         # Get single cell image data
         sc = image[x1:x2, y1:y2]
+
+        # Rescale images
+        if args.scaling_factor is not None:
+            sc = transform.rescale(sc, args.scaling_factor)
 
         # Pad/Crop image tp the desired size
         sc = resize(sc, size=(args.fsize, args.fsize))
