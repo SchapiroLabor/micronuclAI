@@ -48,7 +48,7 @@ def main(args):
 
     # Read in data, it most be contained in a list object for evaluation
     print("Reading image")
-    img = io.imread(args.image)
+    img = [io.imread(args.image)]
 
     # Predict nuclei in image
     print("Predicting")
