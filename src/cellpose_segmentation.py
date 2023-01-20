@@ -1,15 +1,17 @@
+# Built-in libraries
 import argparse
+import time
 from pathlib import Path
 
+# External librarires
 import torch
-from cellpose import models
 from skimage import io
-import time
+from cellpose import models
+from aicsimageio import AICSImage
+from aicsimageio.writers import OmeTiffWriter
 
 
 # Parsing input file and parameters
-
-
 def get_args():
     # Script description
     description = """Uses CellPose to segment nuclei and saves the segmentation mask as numpy array."""
@@ -20,9 +22,8 @@ def get_args():
     # Tool Input
     input = parser.add_argument_group(title="Input")
     input.add_argument("-i", "--image", dest="image", action="store", required=True, help="Pathway to input image.")
-    input.add_argument("-c", "--channels", dest="channels", action="store", type=int, nargs="+", required=True,
-                       help="List of channels used for segmentation of length 2. "
-                            "2nd element  https://cellpose.readthedocs.io/en/latest/settings.html")
+    input.add_argument("-c", "--channel", dest="channel", action="store", type=int, required=False, default=0,
+                       help="Channel to be used in the original image.")
     input.add_argument("-g", "--gpu", dest="gpu", action="store_true", default=False, required=False,
                        help="Use gpu for inference acceleration.")
 
@@ -48,11 +49,13 @@ def main(args):
 
     # Read in data, it most be contained in a list object for evaluation
     print("Reading image")
-    img = [io.imread(args.image)]
+    img = AICSImage(args.image, C=args.channel).get_image_data("YX")
+    print(f"Image with shape: {img.shape}")
+    img = [img]
 
     # Predict nuclei in image
     print("Predicting")
-    masks, flows, styles, diams = model.eval(img, channels=args.channels, diameter=None)
+    masks, flows, styles, diams = model.eval(img, channels=[0, 2], diameter=None)
 
     # Create output folder if it does not exist
     Path(args.out).mkdir(parents=True, exist_ok=True)

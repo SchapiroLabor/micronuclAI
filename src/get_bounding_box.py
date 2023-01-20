@@ -172,7 +172,6 @@ def main(args):
     print(f"Using scalling factor   = {args.scaling_factor}")
 
     # Load image, and mask
-    #image = io.imread(args.image)
     image = AICSImage(args.image, C=args.channel).get_image_data("YX")
     mask = AICSImage(args.mask).get_image_data("YX")
     print(f"Image shape = {image.shape}")
