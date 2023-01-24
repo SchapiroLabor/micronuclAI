@@ -7,6 +7,7 @@ from pathlib import Path
 import torch
 from skimage import io
 from cellpose import models
+from PIL import Image
 from aicsimageio import AICSImage
 from aicsimageio.writers import OmeTiffWriter
 
@@ -22,7 +23,7 @@ def get_args():
     # Tool Input
     input = parser.add_argument_group(title="Input")
     input.add_argument("-i", "--image", dest="image", action="store", required=True, help="Pathway to input image.")
-    input.add_argument("-c", "--channel", dest="channel", action="store", type=int, required=False, default=0,
+    input.add_argument("-c", "--channel", dest="channel", action="store", type=int, required=False, default=None,
                        help="Channel to be used in the original image.")
     input.add_argument("-g", "--gpu", dest="gpu", action="store_true", default=False, required=False,
                        help="Use gpu for inference acceleration.")
@@ -49,7 +50,8 @@ def main(args):
 
     # Read in data, it most be contained in a list object for evaluation
     print("Reading image")
-    img = AICSImage(args.image, C=args.channel).get_image_data("YX")
+    img = io.imread(args.image)
+
     print(f"Image with shape: {img.shape}")
     img = [img]
 
