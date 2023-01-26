@@ -21,6 +21,8 @@ def get_args():
     tool = parser.add_argument_group(title="Required Input", description="Required tool input.")
     tool.add_argument("-i", "--image", dest="image", action="store", required=True, type=str,
                       help="Path to input .czi image.")
+    tool.add_argument("-c", "--channel", dest="channel", action="store", required=False, type=int, default=None,
+                        help="Channel to be used, if not channel provided all the image is saved.")
 
     out = parser.add_argument_group(title="Output", description="Output files.")
     out.add_argument("-o", "--output", dest="output", action="store", required=True, type=str,
@@ -38,6 +40,11 @@ def get_args():
 def main(args):
     # Read .czi image
     image = AICSImage(args.image)
+
+    # Deal with channels
+    if args.channel is not None:
+        image = image.get_image_data("YX", C=args.channel)
+        image = AICSImage(image)
 
     # Save .ome.tif image
     image.save(args.output.joinpath(f"{args.image.stem}.ome.tif"))
