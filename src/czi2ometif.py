@@ -47,6 +47,7 @@ def main(args):
         image = AICSImage(image)
 
     # Save .ome.tif image
+    args.output.mkdir(parent=True, exists_ok=True)
     image.save(args.output.joinpath(f"{args.image.stem}.ome.tif"))
 
 
