@@ -1,5 +1,6 @@
 # Built in libraries
 import time
+from tqdm import tqdm
 import argparse
 from pathlib import Path
 from skimage import exposure, transform
@@ -25,7 +26,7 @@ def get_options():
 
     # Tool options
     options = parser.add_argument_group(title="Options")
-    options.add_argument("-fv", "--field-view", dest="field_view", action="store", required=False, default="50", type=int,
+    options.add_argument("-fv", "--fov", dest="fov", action="store", required=False, default=0, type=int,
                          help="Number of pixels to expand each cell bounding box, field of view of each cell "
                               "[default = 50]")
     options.add_argument("-fs", "--final-size", dest="fsize", action="store", required=False, default=256, type=int,
@@ -39,7 +40,7 @@ def get_options():
     options.add_argument("-yms", "--y-min-size", dest="y_min_size", action="store", required=False, default=0, type=int,
                          help="Limit for the minimum size required for the y axis in an image.")
     # Tool output
-    output = parser.add_argument_group(title="Output")
+    output = parser.add_argument_group(title = "Output")
     output.add_argument("-o", "--out", dest="out", action="store", required=True, help="Path to the output data folder")
 
     # Parse arguments
@@ -99,6 +100,73 @@ def get_single_cell_coordinates(mask, cellid, expansion):
     y2 = y.max()+expansion if y.max()+expansion < mask.shape[1] else mask.shape[1]
 
     # Return coordinates for the cell with expansion
+    return np.array([x1, x2, y1, y2])
+
+
+def isolate_nuclei(mask):
+    """
+    Gets the bounding box of all cells for a given mask.
+
+    :param mask: Image with nuclear
+    :return:
+    """
+    # Get non zero values from the mask
+    nonzero = np.nonzero(mask)
+
+    # Get unique values assign identity to non-zero values
+    # print(f"Initializing coordinates with len = {len(nonzero[0])}")
+    toasign = {i: [set(), set()] for i in range(1, np.max(mask) + 1)}
+
+    # Assigned non-zero values to their cellid
+    # print(f"Iterating over pairs of non-zero values")
+    for i, j in tqdm(zip(nonzero[0], nonzero[1])):
+        idx = mask[i][j]
+        toasign[idx][0] |= set([i])
+        toasign[idx][1] |= set([j])
+
+    # Iterate over each cellid and get the bounding box of the cell
+    # print(f"Get dictionary with coordinates")
+    coords = {key: np.array([min(toasign[key][0]), max(toasign[key][0]), min(toasign[key][1]), max(toasign[key][1])])
+              for key in tqdm(toasign.keys())}
+
+    return coords
+
+
+def isonuc(mask):
+    # Get indexes of nonzero elements
+    nonzero = np.array(np.nonzero(mask)).T
+
+    # Get cell identities of nonzero matrix
+    identities = np.array(list(map(lambda x: mask[x[0]][x[1]], nonzero)))
+
+    # Stack identities with the nonzero matrix
+    stacked = np.column_stack((identities, nonzero))
+
+    # sort them by identity
+    stacked = stacked[stacked[:, 0].argsort()]
+
+    # Group them
+    grouped = np.split(stacked[:, 1:], np.unique(stacked[:, 0], return_index=True)[1][1:])
+
+    # Get coordinates, use key+1 to match to cellid
+    coords = {key+1:(min(vals[:,0]), max(vals[:,0]), min(vals[:,1]), max(vals[:,1])) for key, vals in
+              enumerate(grouped)}
+    # coords3 = np.array(list(map(lambda x: np.array([min(x[:, 0]), max(x[:, 0]), min(x[:, 1]), max(x[:, 1])]),
+    #                             np.array(grouped, dtype=object))))
+    return coords
+
+
+def expand_bounding_box(mask, coord, expansion):
+    # Unpack values
+    x1, x2, y1, y2 = coord
+
+    # Carefully expand the coordinates, we can not have coordinates less than 0
+    # and we can not have coordinates greater than the size of the image
+    x1 = x1-expansion if x1-expansion > 0 else 0
+    x2 = x2+expansion if x2+expansion < mask.shape[0] else mask.shape[0]
+    y1 = y1-expansion if y1-expansion > 0 else 0
+    y2 = y2+expansion if y2+expansion < mask.shape[1] else mask.shape[1]
+
     return np.array([x1, x2, y1, y2])
 
 
@@ -172,20 +240,27 @@ def main(args):
     print(f"Using scalling factor   = {args.scaling_factor}")
 
     # Load image, and mask
-    image = AICSImage(args.image, C=args.channel).get_image_data("YX")
-    mask = AICSImage(args.mask).get_image_data("YX")
-    print(f"Image shape = {image.shape}")
-    print(f"Mask shape  = {mask.shape}")
+    # image = AICSImage(args.image, C=args.channel).get_image_data("YX")
+    print(f"Loading image = {args.image}")
+    image = io.imread(args.image)
+    # mask = AICSImage(args.mask).get_image_data("YX")
+    print(f"Loading mask = {args.mask}")
+    mask = io.imread(args.mask)
+    print(f"Image shape  = {image.shape}")
+    print(f"Mask shape   = {mask.shape}")
 
     # Iterate over each cell in the mask and get single cell bounding boxes sc_bb
-    # CellIDs start from 1 that's why I used range from 1 to n+1
-    # Doing this cell by cell since it can be easily parallelized
-    print("Getting bounding boxes")
-    mask_sc_bb = [get_single_cell_coordinates(mask, i, expansion=args.field_view) for i in range(1, mask.max() + 1)]
+    print(f"Isolating nuclei = {mask.max()}")
+    mask_sc_bb = isonuc(mask)
+
+    # Expand mask
+    print(f"Expand bounding box by  = {args.fov}")
+    mask_sc_bb_exp = {k: expand_bounding_box(mask, coord, args.fov) for k, coord in tqdm(mask_sc_bb.items())}
+
 
     # We now iterate over each predicted bounding box
     print("Expanding bounding box and save")
-    for cellid, coord in enumerate(mask_sc_bb):
+    for cellid, coord in tqdm(mask_sc_bb_exp.items()):
         # Get the coordinates of the bounding box for each cell mask
         x1, x2, y1, y2 = coord
 
@@ -212,7 +287,7 @@ def main(args):
         # Scale image to 8bit for jpeg transform
         sc = exposure.rescale_intensity(sc, out_range=(0, 255)).astype(np.uint8)
 
-        # Save SC image
+        # Save SC image, create output directory if it does not exists
         args.out.mkdir(parents=True, exist_ok=True)
         io.imsave(str(args.out.joinpath(f"{args.image.name.split('.')[0]}_{cellid}.png")), sc)
 
