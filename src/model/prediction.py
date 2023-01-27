@@ -28,6 +28,8 @@ def get_args():
                        help="Pathway to image folder.")
     input.add_argument("-m", "--model", dest="model", action="store", required=True,
                        help="Pathway to prediction model.")
+    input.add_argument("-d", "--device", dest="device", action="store", required=False, default="cpu",
+                       help="Device to be used for training [default='cpu']")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -61,7 +63,7 @@ def main(args):
     ])
 
     # Load model and set to evaluation
-    device = "mps"
+    device = args.device
     net = torch.load(args.model).to(device)
     net.eval()
 
