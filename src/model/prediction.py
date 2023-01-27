@@ -84,6 +84,7 @@ def main(args):
 
     # Save output file
     df_predictions = pd.DataFrame.from_dict(dict_tmp)
+    args.out.mkdir(parents=True, exist_ok=True)
     df_predictions.to_csv(args.out.joinpath(f"{args.images.name}_predictions.csv"), index=False)
 
 
