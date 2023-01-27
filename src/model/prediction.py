@@ -64,6 +64,7 @@ def main(args):
 
     # Load model and set to evaluation
     device = args.device
+    print(f"Using device = {device}")
     net = torch.load(args.model).to(device)
     net.eval()
 
