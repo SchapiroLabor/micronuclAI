@@ -48,7 +48,7 @@ def main(args):
         img = rgb2gray(img)
 
     # Save image
-    args.out.mkdir(parents=True, exists_ok=True)
+    args.out.mkdir(parents=True, exist_ok=True)
     io.imsave(args.out.joinpath(f"{args.image.stem}.ome.tif"), img)
     # AICSImage(img).save(args.out.joinpath(f"{args.image.stem}.ome.tif"))
 
