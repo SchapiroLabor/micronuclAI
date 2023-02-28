@@ -19,7 +19,7 @@ from augmentations import preprocess_test as preprocess
 
 def get_args():
     # Script description
-    description = """Preprocesses images with 99.9 Percentile Scaling and CLAHE."""
+    description = """Get an attention map using the gradCAM method for a given image and model"""
 
     # Add parser
     parser = argparse.ArgumentParser(description)
