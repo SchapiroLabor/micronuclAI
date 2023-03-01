@@ -35,6 +35,9 @@ def get_options():
                          help="Flag to remove cells that lay on the edge of the image.")
     options.add_argument("-s", "--scaling-factor", dest="scaling_factor", action="store", required=False, default=None,
                          type=float, help="Scaling factor values < 1 make image smaller, >0 make it big [default=None]")
+    options.add_argument("-ds", "--desired-scale", dest="desired_scale", action="store", required=False, default=None,
+                         type=float, help="Desired scaling factor, it will calculate an individual scaling factor per "
+                                          "nuclei to satisfy the desired calling factor here provided [default=None]")
     options.add_argument("-xms", "--x-min-size", dest="x_min_size", action="store", required=False, default=0, type=int,
                          help="Limit for the minimum size required for the x axis in an image.")
     options.add_argument("-yms", "--y-min-size", dest="y_min_size", action="store", required=False, default=0, type=int,
@@ -253,6 +256,10 @@ def main(args):
     print(f"Isolating nuclei = {mask.max()}")
     mask_sc_bb = isonuc(mask)
 
+    # Calculate the ratio of expansion
+    print(f"Calculate individual scaling factor to = {args.desired_scale}")
+    sfactor = [args.desired_scale/(max(x2-x1, y2-y1)/args.fsize) for k, (x1, x2, y1, y2) in mask_sc_bb.items()]
+
     # Expand mask
     print(f"Expand bounding box by  = {args.fov}")
     mask_sc_bb_exp = {k: expand_bounding_box(mask, coord, args.fov) for k, coord in tqdm(mask_sc_bb.items())}
@@ -264,13 +271,13 @@ def main(args):
         # Get the coordinates of the bounding box for each cell mask
         x1, x2, y1, y2 = coord
 
-        # Remove cells from the edge
+        # Remove cells from the edge, at zero and to the bottom and right
         if args.remove_edge and (any(coord == 0) or any(coord == mask.shape[0]) or any(coord == mask.shape[1])):
             print(f"{args.image.name} cell {cellid} removed: edge")
             continue
 
         # Remove cells if they re bellow a certain threshold
-        if (x2-x1) < args.x_min_size and (y2-y1) < args.y_min_size:
+        if (x2-x1) < args.x_min_size or (y2-y1) < args.y_min_size:
             print(f"{args.image.name} cell {cellid} removed: small")
             continue
 
@@ -280,6 +287,9 @@ def main(args):
         # Rescale images
         if args.scaling_factor is not None:
             sc = transform.rescale(sc, args.scaling_factor)
+        elif args.desired_scale is not None:
+            sc = transform.rescale(sc, sfactor[cellid - 1])
+
 
         # Pad/Crop image tp the desired size
         sc = resize(sc, size=(args.fsize, args.fsize))
