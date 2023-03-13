@@ -3,7 +3,7 @@ import time
 from tqdm import tqdm
 import argparse
 from pathlib import Path
-from skimage import exposure, transform
+from skimage import exposure, transform, restoration
 from aicsimageio import AICSImage
 
 # External libraries
@@ -258,7 +258,8 @@ def main(args):
 
     # Calculate the ratio of expansion
     print(f"Calculate individual scaling factor to = {args.desired_scale}")
-    sfactor = [args.desired_scale/(max(x2-x1, y2-y1)/args.fsize) for k, (x1, x2, y1, y2) in mask_sc_bb.items()]
+    if args.desired_scale is not None:
+        sfactor = [args.desired_scale/(max(x2-x1, y2-y1)/args.fsize) for k, (x1, x2, y1, y2) in mask_sc_bb.items()]
 
     # Expand mask
     print(f"Expand bounding box by  = {args.fov}")
@@ -289,7 +290,6 @@ def main(args):
             sc = transform.rescale(sc, args.scaling_factor)
         elif args.desired_scale is not None:
             sc = transform.rescale(sc, sfactor[cellid - 1])
-
 
         # Pad/Crop image tp the desired size
         sc = resize(sc, size=(args.fsize, args.fsize))
