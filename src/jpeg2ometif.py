@@ -9,6 +9,7 @@ from skimage.color import rgb2gray
 from PIL import Image
 # from aicsimageio import AICSImage
 Image.MAX_IMAGE_PIXELS = None
+from aicsimageio import AICSImage
 
 
 # Argument parser
@@ -49,8 +50,8 @@ def main(args):
 
     # Save image
     args.out.mkdir(parents=True, exist_ok=True)
-    io.imsave(args.out.joinpath(f"{args.image.stem}.ome.tif"), img)
-    # AICSImage(img).save(args.out.joinpath(f"{args.image.stem}.ome.tif"))
+    # io.imsave(args.out.joinpath(f"{args.image.stem}.ome.tif"), img)
+    AICSImage(img).save(args.out.joinpath(f"{args.image.stem}.tif"))
 
 
 if __name__ == "__main__":
