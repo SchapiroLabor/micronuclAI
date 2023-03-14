@@ -41,11 +41,13 @@ def main(args):
     # Read .czi image
     img = AICSImage(args.image)
     print(f"Image shape = {img.shape}")
+    print(f"Image dimensions = {img.dims}")
 
     # Deal with channels
     if args.channel is not None:
-        image = img.get_image_data("YX", C=args.channel)
-        image = AICSImage(image)
+        img = img.get_image_data("YX", C=args.channel)
+        print(f"Final image shape = {img.shape}")
+        img = AICSImage(img)
 
     # Save .ome.tif image
     args.output.mkdir(parents=True, exist_ok=True)
