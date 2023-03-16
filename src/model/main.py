@@ -94,7 +94,7 @@ def main(args):
 
         # Training model
         trainer = pl.Trainer(
-            precision=16,
+            precision=32,
             accelerator="auto",
             max_epochs=300,
             log_every_n_steps=5,
