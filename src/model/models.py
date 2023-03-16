@@ -44,16 +44,20 @@ class BinaryClassifierModel(pl.LightningModule):
 
     def general_step(self, batch, batch_idx, mode):
         images, targets = batch
-
+        y_onehot = F.one_hot(targets.squeeze(), num_classes=2).float()
         # forward pass
         out = self.forward(images)
 
         # loss
         targets = targets.float().view(-1, 1)
-        loss = F.binary_cross_entropy(out, targets)
+        # loss = F.binary_cross_entropy(out, targets)
 
+        # Get predictions
+        a, predicted = torch.max(out, 1)
         preds = out.argmax(axis=1)
+        loss = F.cross_entropy(out, y_onehot)
         n_correct = (targets == preds).sum()
+
         return loss, n_correct
 
     def general_end(self, outputs, mode):
@@ -108,7 +112,8 @@ class BinaryClassifierModel(pl.LightningModule):
             X, y = batch
             X = X.to(self.device)
             score = self.forward(X)
-            scores.append(score.detach().cpu().numpy())
+            a, predicted = torch.max(score, 1)
+            scores.append(predicted.detach().cpu().numpy())
             labels.append(y.detach().cpu().numpy())
 
         scores = np.concatenate(scores, axis=0)
@@ -130,7 +135,8 @@ class BinaryClassifierModel(pl.LightningModule):
             X, y = batch
             X = X.to(self.device)
             score = self.forward(X)
-            scores.append(score.detach().cpu().numpy())
+            a, predicted = torch.max(score, 1)
+            scores.append(predicted.detach().cpu().numpy())
             labels.append(y.detach().cpu().numpy())
 
         scores = np.concatenate(scores, axis=0)
