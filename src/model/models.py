@@ -51,7 +51,8 @@ class BinaryClassifierModel(pl.LightningModule):
         # loss
         targets = targets.float().view(-1, 1)
         loss = F.binary_cross_entropy(out, targets)
-
+        #loss = F.cross_entropy(out, targets)
+        
         preds = out.argmax(axis=1)
         n_correct = (targets == preds).sum()
         return loss, n_correct
