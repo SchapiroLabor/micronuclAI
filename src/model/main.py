@@ -90,10 +90,11 @@ def main(args):
         }
 
         # Set model
-        model = BinaryClassifierModel(hparams, datasets, EfficientNetClassifier(out_features=2))
+        model = BinaryClassifierModel(hparams, datasets, EfficientNetClassifier(out_features=1))
 
         # Training model
         trainer = pl.Trainer(
+            precision=16,
             accelerator="auto",
             max_epochs=300,
             log_every_n_steps=5,
