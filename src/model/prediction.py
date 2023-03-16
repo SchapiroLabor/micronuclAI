@@ -10,7 +10,8 @@ from PIL import Image
 import numpy as np
 import pandas as pd
 from pathlib import Path
-
+from tqdm import tqdm
+from augmentations import preprocess_test as preprocess
 from dataset import CINDataset
 from models import (EfficientNetClassifier, BinaryClassifierModel)
 
@@ -51,17 +52,6 @@ def main(args):
     # Get list of file names
     list_cropped_files = [path.name for path in args.images.iterdir()]
 
-    # Prediction preprocess
-    preprocess = transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.Grayscale(num_output_channels=3),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
-        )
-    ])
-
     # Load model and set to evaluation
     device = args.device
     print(f"Using device = {device}")
@@ -70,7 +60,7 @@ def main(args):
 
     # Iterate over files
     list_predictions = []
-    for image in args.images.iterdir():
+    for image in tqdm(args.images.iterdir()):
         img_pil = Image.open(image)
         img_tensor = preprocess(img_pil).unsqueeze(0).to(device)
         y = net(img_tensor).cpu().detach().numpy()
