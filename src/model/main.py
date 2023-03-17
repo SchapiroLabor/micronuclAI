@@ -103,32 +103,33 @@ def main(args):
         trainer.fit(model)
 
         # Evaluate the model
-        validation_scores, validation_labels = model.get_val_pred_scores()
-        dict_val_evaluation = evaluate_binary_model(validation_scores, validation_labels)
-        df_val_evaluation = pd.DataFrame.from_dict(dict_val_evaluation)
-        EVALUATION_FILE = RESULTS_FOLDER.joinpath(f"evaluation/validation_evaluation_scores_{str(k)}.csv")
-        EVALUATION_FILE.parent.mkdir(parents=True, exist_ok=True)
-        df_val_evaluation.to_csv(EVALUATION_FILE, index=False)
+        # validation_scores, validation_labels = model.get_val_pred_scores()
+        # dict_val_evaluation = evaluate_binary_model(validation_scores, validation_labels)
+        # df_val_evaluation = pd.DataFrame.from_dict(dict_val_evaluation)
+        # EVALUATION_FILE = RESULTS_FOLDER.joinpath(f"evaluation/validation_evaluation_scores_{str(k)}.csv")
+        # EVALUATION_FILE.parent.mkdir(parents=True, exist_ok=True)
+        # df_val_evaluation.to_csv(EVALUATION_FILE, index=False)
 
         # Get test score
         test_scores, test_labels = model.get_test_pred_scores()
-        tuple_scores = (test_scores, test_labels)
-        SCORE_FILE = RESULTS_FOLDER.joinpath(f"test_scores_{str(k)}.p")
-        SCORE_FILE.parent.mkdir(parents=True, exist_ok=True)
-        pickle.dump(tuple_scores, open(SCORE_FILE, "wb"))
+        # tuple_scores = (test_scores, test_labels)
+        # SCORE_FILE = RESULTS_FOLDER.joinpath(f"test_scores_{str(k)}.p")
+        # SCORE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        # pickle.dump(tuple_scores, open(SCORE_FILE, "wb"))
 
         # Evaluate test
-        dict_test_evaluation = evaluate_binary_model(test_scores, test_labels)
-        df_test_evaluation = pd.DataFrame.from_dict(dict_test_evaluation)
-        RESULTS_FILE = RESULTS_FOLDER.joinpath(f"test_evaluation_scores_{str(k)}.csv")
-        RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
-        df_test_evaluation.to_csv(RESULTS_FILE, index=False)
+        # dict_test_evaluation = evaluate_binary_model(test_scores, test_labels)
+        # df_test_evaluation = pd.DataFrame.from_dict(dict_test_evaluation)
+        print([test_scores, test_labels])
+        # df_test_evaluation = pd.DataFrame.from_dict([test_scores, test_labels])
+        # RESULTS_FILE = RESULTS_FOLDER.joinpath(f"test_evaluation_scores_{str(k)}.csv")
+        # RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        # df_test_evaluation.to_csv(RESULTS_FILE, index=False)
 
         # Save model
         MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model_{str(k)}.pt")
         MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
         torch.save(model, MODEL_FILE)
-
 
 
 if __name__ == "__main__":

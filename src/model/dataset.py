@@ -14,7 +14,7 @@ class CINDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         filename = self.df.loc[index, "image"]
-        label = self.df.loc[index, "label"]
+        label = self.df.loc[index, "count"]
         image = PIL.Image.open(os.path.join(self.images_folder, filename))
         if self.transform is not None:
             image = self.transform(image)
