@@ -15,7 +15,7 @@ from dataset import CINDataset
 from models import (EfficientNetClassifier, BinaryClassifierModel)
 from augmentations import preprocess_test as p_t
 from augmentations import preprocess_train as p_tr
-from utils import evaluate_binary_model
+from utils import evaluate_binary_model, evaluate_multiclass_model, plot_confusion_matrix
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 import argparse
@@ -111,7 +111,7 @@ def main(args):
         # df_val_evaluation.to_csv(EVALUATION_FILE, index=False)
 
         # Get test score
-        test_scores, test_labels = model.get_test_pred_scores()
+
         # tuple_scores = (test_scores, test_labels)
         # SCORE_FILE = RESULTS_FOLDER.joinpath(f"test_scores_{str(k)}.p")
         # SCORE_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -120,11 +120,31 @@ def main(args):
         # Evaluate test
         # dict_test_evaluation = evaluate_binary_model(test_scores, test_labels)
         # df_test_evaluation = pd.DataFrame.from_dict(dict_test_evaluation)
-        print([test_scores.squeeze(), test_labels])
+
         # df_test_evaluation = pd.DataFrame.from_dict([test_scores, test_labels])
         # RESULTS_FILE = RESULTS_FOLDER.joinpath(f"test_evaluation_scores_{str(k)}.csv")
-        # RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        #
         # df_test_evaluation.to_csv(RESULTS_FILE, index=False)
+
+        # Save test results and metrics
+        TEST_METRICS = RESULTS_FOLDER.joinpath(f"test/test_scores_{str(k)}.csv")
+        TEST_CONFMTRX = RESULTS_FOLDER.joinpath(f"test/test_confusion_matrix_{str(k)}.pdf")
+        TEST_PREDICTIONS = RESULTS_FOLDER.joinpath(f"test/test_predictions_{str(k)}.csv")
+
+        TEST_METRICS.parent.mkdir(parents=True, exist_ok=True)
+        test_scores, test_labels = model.get_test_pred_scores()
+        df_test_metrics = evaluate_multiclass_model(test_scores, test_labels)
+        df_test_metrics.to_csv(TEST_METRICS, index=False)
+
+        # Get plot for test data
+        fig = plot_confusion_matrix(test_scores, test_labels)
+        fig.savefig(TEST_CONFMTRX, dpi=300)
+
+        # Save predictions
+        df_test_predictions = pd.DataFrame([test_scores, test_labels], columns=["scores", "labels"])
+        df_test_predictions.to_csv(TEST_PREDICTIONS, index=False)
+
+
 
         # Save model
         MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model_{str(k)}.pt")

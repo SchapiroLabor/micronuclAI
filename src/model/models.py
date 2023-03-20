@@ -137,7 +137,7 @@ class BinaryClassifierModel(pl.LightningModule):
         labels = np.concatenate(labels, axis=0)
 
         self.model.train()
-        return scores, labels
+        return scores.squeeze(), labels
 
     def reset_weights(self):
         self.model.reset_parameters()
