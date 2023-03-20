@@ -1,4 +1,9 @@
-from sklearn.metrics import confusion_matrix, roc_auc_score, balanced_accuracy_score
+import pandas as pd
+from sklearn.metrics import confusion_matrix, roc_auc_score, balanced_accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, mean_absolute_error, mean_squared_error, balanced_accuracy_score
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
 import pickle
 
 
@@ -12,6 +17,60 @@ def evaluate_binary_model(scores, labels):
     dict_metrics = {"auc": auc, "confusion_matrix": (tn, fp, fn, tp), "balanced_accuracy": balanced_accuracy}
 
     return dict_metrics
+
+
+def plot_confusion_matrix(scores, labels):
+    # Get confusion matrix
+    cm = confusion_matrix(scores, labels)
+
+    # Create canvas and plot h confusion amtrix
+    fig, ax = plt.subplots(1, 1, figsize=(9, 9))
+    sns.heatmap(cm, annot=True, fmt=".0f", cmap="crest", cbar=False, ax=ax)
+    ax.set_xlabel("Target")
+    ax.set_ylabel("Prediction")
+    ax.set_title("Confusion Matrix")
+    sns.despine()
+
+    return fig
+
+
+def evaluate_multiclass_model(scores, labels):
+    # Calculate MAE
+    mae = mean_absolute_error(scores, labels)
+
+    # Calculate MSE
+    mse = mean_squared_error(scores, labels)
+
+    # calculate RMSE
+    rmse = np.sqrt(mse)
+
+    # calculate Acuracy
+    acc = accuracy_score(scores, labels)
+
+    # calculate balanced accuracy
+    acc_bal = balanced_accuracy_score(scores, labels)
+
+    # Get F1
+    f1_micro = f1_score(scores, labels, average="micro")
+    f1_macro = f1_score(scores, labels, average="macro")
+    f1_weighted = f1_score(scores, labels, average="weighted")
+
+    # Gather results
+    dict_metrics = {
+        "MAE": mae,
+        "MSE": mse,
+        "RMSE": rmse,
+        "ACC": acc,
+        "ACC_balanced": acc_bal,
+        "f1_micro": f1_micro,
+        "f1_macro": f1_macro,
+        "f1_weighted": f1_weighted,
+    }
+
+    # convert to dataframe
+    metrics = pd.DataFrame.from_dict(dict_metrics)
+
+    return metrics
 
 
 def create_lists_for_train_test_split(index_test_well, path_dict_well_images):
