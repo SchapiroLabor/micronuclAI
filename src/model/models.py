@@ -39,7 +39,7 @@ class BinaryClassifierModel(pl.LightningModule):
 
     def forward(self, x):
         x = self.model(x)
-        x = torch.sigmoid(x)
+        # x = torch.sigmoid(x)
         return x
 
     def general_step(self, batch, batch_idx, mode):
