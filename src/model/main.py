@@ -120,7 +120,7 @@ def main(args):
         # Evaluate test
         # dict_test_evaluation = evaluate_binary_model(test_scores, test_labels)
         # df_test_evaluation = pd.DataFrame.from_dict(dict_test_evaluation)
-        print([test_scores, test_labels])
+        print([test_scores.squeeze(), test_labels])
         # df_test_evaluation = pd.DataFrame.from_dict([test_scores, test_labels])
         # RESULTS_FILE = RESULTS_FOLDER.joinpath(f"test_evaluation_scores_{str(k)}.csv")
         # RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
