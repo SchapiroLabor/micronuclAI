@@ -132,17 +132,22 @@ def main(args):
         TEST_PREDICTIONS = RESULTS_FOLDER.joinpath(f"test/test_predictions_{str(k)}.csv")
 
         TEST_METRICS.parent.mkdir(parents=True, exist_ok=True)
+        
         test_scores, test_labels = model.get_test_pred_scores()
-        df_test_metrics = evaluate_multiclass_model(test_scores, test_labels)
+        df_test = pd.DataFrame([test_scores, test_labels]).T.rename(columns={0:"scores",1:"targets"})
+        df_test["targets"] = df_test["targets"].astype(int)
+        df_test["rounded"] = df_test["scores"].apply(lambda x: round(x))
+
+        df_test_metrics = evaluate_multiclass_model(df_test["rounded"], df_test["targets"])
         df_test_metrics.to_csv(TEST_METRICS, index=False)
 
         # Get plot for test data
-        fig = plot_confusion_matrix(test_scores, test_labels)
+        fig = plot_confusion_matrix(df_test["rounded"], df_test["targets"])
         fig.savefig(TEST_CONFMTRX, dpi=300)
 
         # Save predictions
-        df_test_predictions = pd.DataFrame([test_scores, test_labels], columns=["scores", "labels"])
-        df_test_predictions.to_csv(TEST_PREDICTIONS, index=False)
+        # df_test_predictions = pd.DataFrame([test_scores, test_labels], columns=["scores", "labels"])
+        df_test.to_csv(TEST_PREDICTIONS, index=False)
 
 
 

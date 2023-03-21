@@ -68,7 +68,7 @@ def evaluate_multiclass_model(scores, labels):
     }
 
     # convert to dataframe
-    metrics = pd.DataFrame.from_dict(dict_metrics)
+    metrics = pd.DataFrame(dict_metrics, index=range(1))
 
     return metrics
 
