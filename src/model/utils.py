@@ -54,6 +54,18 @@ def evaluate_multiclass_model(scores, labels):
     f1_micro = f1_score(scores, labels, average="micro")
     f1_macro = f1_score(scores, labels, average="macro")
     f1_weighted = f1_score(scores, labels, average="weighted")
+    
+    # Micronuclei count
+    n_micro = scores.sum() 
+
+    # Cell count
+    n_cells = scores.shape[0]
+
+    # Micronuclei ratio
+    mn_ratio = n_micro/n_cells
+
+    # Micronuclei deviance
+    mn_deviant = (labels.sum()-scores.sum())/labels.sum()
 
     # Gather results
     dict_metrics = {
@@ -65,6 +77,10 @@ def evaluate_multiclass_model(scores, labels):
         "f1_micro": f1_micro,
         "f1_macro": f1_macro,
         "f1_weighted": f1_weighted,
+        "micronuclei": n_micro,
+        "cells": n_cells,
+        "micronuclei_cell_ratio": mn_ratio,
+        "micronuclei_deviance": mn_deviant
     }
 
     # convert to dataframe
