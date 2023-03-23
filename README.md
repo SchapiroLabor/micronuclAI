@@ -2,32 +2,6 @@
 
 Chromosomal Instability, micronuclei automatic detection.
 
-# Training of the model
-
-## Raw data
-
-Original raw data consist of 217 20x zoom `.czi` image files belonging to 8 different plates.  
-
-| Plate           | # of Files |
-|-----------------|------------|
-| A375_dnMCAK-dox | 26         |
-| A375_dnMCAK+dox | 27         |
-| A375_kifa-dox   | 24         |
-| A375_kifa+dox   | 33         |
-| A375_kifc-dox   | 27         |
-| A375_kifc+dox   | 24         |
-| A375-dox        | 26         |
-| A375+dox        | 30         |
-| Total           | 217        |
-
-Each file is contained 3 channels: Cytoskeleton, DAPI and autoflorescence channel.
-
-| Channel Number | Marker         |
-|----------------|----------------|
-| 0              | Cytoskeleton   |
-| 1              | DAPI           |
-| 2              | Autoflouresnce |
-
 ## Pipeline overview
 We perform a series of steps for training the MicronucleAI model.
 1. Pre-Processing
@@ -37,7 +11,7 @@ We perform a series of steps for training the MicronucleAI model.
 5. Training
 6. Prediction
 
-If you only want to use the predictive model you must folow the following steps.
+If you only want to use the predictive model you must follow the following steps.
 1. Pre-Processing
 2. Segmentation
 3. Nuclei Isolation / Nuclei Cropping
@@ -45,17 +19,48 @@ If you only want to use the predictive model you must folow the following steps.
 
 We will describe the steps in detail for the training procedure.
 
+# Training of the model
+
+## Raw data
+
+The dataset used for training consist of 216 20x zoom `.czi` image files obtained from 8 different plates (see table).
+
+| Plate           | # of Files |
+|-----------------|------------|
+| A375_dnMCAK-dox | 25         |
+| A375_dnMCAK+dox | 27         |
+| A375_kifa-dox   | 24         |
+| A375_kifa+dox   | 33         |
+| A375_kifc-dox   | 27         |
+| A375_kifc+dox   | 24         |
+| A375-dox        | 26         |
+| A375+dox        | 30         |
+| Total           | 216        |
+
+Each `.czi` file has 3 channels: Cytoskeleton, DAPI and auto-florescence channel.
+
+| Channel Number | Marker         |
+|----------------|----------------|
+| 0              | Cytoskeleton   |
+| 1              | DAPI           |
+| 2              | Autoflouresnce |
+
 ## Pre-Processing
 
-The goal of pre-processing our dataset is to convert multiple format datasets to `.ome.tif` ones. We also want to work only with the nuclear channel (DAPI in this case).
-For the pre-processing we converted the 216 `.czi` into `.ome.tif` files using `src/czi2ometif.py`
-A way to do this in a single command is to use Nextflow for processing using the following command.  
+In this step we re-formated the `.czi` formated image files to `.ome.tif` and select only the DAPI channel for further nuclear segmentation. 
+To perform the convertion we use the script `src/czi2ometif.py`. This script makes use of the AICSImageio library to handle the conversion.
 
+Example for one image:
+```
+python czi2ometif.py -i path/to/image_1.czi -o path/to/converted -c 1
+```
 
+A way to do this in a single command is to use Nextflow for processing using the following command.
 ```
-nextflow run workflow/czi2ometif.nf --input "/Users/miguelibarra/PycharmProjects/cin/data/training/raw/*.czi" --output /Users/miguelibarra/PycharmProjects/cin/data/training/ometif -with-conda true
+nextflow run workflow/czi2ometif.nf --input "/Users/miguelibarra/PycharmProjects/cin/data/training/raw/*.czi" --channel 1 --output /Users/miguelibarra/PycharmProjects/cin/data/training/ometif -with-conda true
 ```
-Processing time of 4m 19s on M1 Mac 32 Gb.  
+
+Processing time of 4m 19s on M1 Mac 32 Gb RAM.
 
 ## Segmentation 
 
@@ -69,10 +74,46 @@ nextflow run labsyspharm/mcmicro --in data/original/mcm_original/ --params mcm_p
 ```
 nextflow run workflow/mask_cellpose.nf  --input --output
 ```
+ 
 ## Nuclei isolation
 
+To train a CNN/DNN is necessary to have a standardized data format. For this instance, we are interested into training an EfficientNet B-0 binary classifier using an image size of 256 x 256 pixels per image. Each image containing (ideally) a single nuclei.  
+
+The process we follow for extracting single nucleus images goes as follows:
+
+1. Get the corresponding image and mask.
+2. Get the bounding box of each identify nuclei.
+3. Calculate scale factor to match the desired cell/image ratio.
+4. Expand the field of view by a given factor (in this case 20 pixels on each side)
+6. Remove the cells that are smaller than a certain threshold (in this case 140 pixels on either height or width).
+7. Re-scale the image to the desired cell/image ration (in this case 0.7)
+8. Pad and crop the image as necessary to the desired size (256 x 256)
+9. Re-scale the brightness intensity values
+10. Save as an 8-bit `.png` image.
+
+With this processing pipeline we are able to retrieve 2410 single nuclei.
+
+```
+nextflow run workflow/isolate_cells.nf --masks "/Users/miguelibarra/PycharmProjects/cin/data/training/segmentation/mesmer_whole/*" --images "/Users/miguelibarra/PycharmProjects/cin/data/training/ometif" --output "/Users/miguelibarra/PycharmProjects/cin/data/training/isonuc/mesmer_wc_" --fv 20 --ds 0.7 --xms 140 --yms 140  -with-conda true
+```
+
+## Labeling
+
+We labeled the 2,642 single nuclear images by using the labeling tool.
+1. According to Miguel's labeling: 
+
+| # micronuclei | frequency |
+|---------------|-----------|
+| 0             | 2148      |
+| 1             | 419       |
+| 2             | 53        |
+| 3             | 15        |
+| 4             | 5         |
+| 5             | 2         |
+| 6             | 1         |
 
 ## Training
+
 
 
 ## Prediction
