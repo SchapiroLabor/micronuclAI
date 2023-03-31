@@ -10,6 +10,7 @@ from PIL import Image
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from tqdm import tqdm
 
 from dataset import CINDataset
 from models import (EfficientNetClassifier, BinaryClassifierModel)
@@ -70,7 +71,7 @@ def main(args):
 
     # Iterate over files
     list_predictions = []
-    for image in args.images.iterdir():
+    for image in tqdm(list(args.images.iterdir())):
         img_pil = Image.open(image)
         img_tensor = preprocess(img_pil).unsqueeze(0).to(device)
         y = net(img_tensor).cpu().detach().numpy()
