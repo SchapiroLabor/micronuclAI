@@ -60,7 +60,7 @@ def main(args):
 
     # Iterate over files
     list_predictions = []
-    for image in tqdm(args.images.iterdir()):
+    for image in tqdm(list(args.images.iterdir())):
         img_pil = Image.open(image)
         img_tensor = preprocess(img_pil).unsqueeze(0).to(device)
         y = net(img_tensor).cpu().detach().numpy()

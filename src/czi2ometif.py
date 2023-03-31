@@ -46,10 +46,11 @@ def main(args):
     # Deal with channels
     if args.channel is not None:
         img = img.get_image_data("YX", C=args.channel)
-        print(f"Final image shape = {img.shape}")
+        print(f"Image shape = {img.shape}")
         img = AICSImage(img)
 
     # Save .ome.tif image
+    print("Saving .ome.tif image...")
     args.output.mkdir(parents=True, exist_ok=True)
     img.save(args.output.joinpath(f"{args.image.stem}.ome.tif"))
 
