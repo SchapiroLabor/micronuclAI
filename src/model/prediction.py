@@ -55,7 +55,7 @@ def main(args):
     # Load model and set to evaluation
     device = args.device
     print(f"Using device = {device}")
-    net = torch.load(args.model, map_location=device)#.to(device)
+    net = torch.load(args.model, map_location=device)
     net.eval()
 
     # Iterate over files
@@ -73,6 +73,7 @@ def main(args):
     }
 
     # Save output file
+    print("Finished prediction. Saving output file.")
     df_predictions = pd.DataFrame.from_dict(dict_tmp)
     args.out.mkdir(parents=True, exist_ok=True)
     df_predictions.to_csv(args.out.joinpath(f"{args.images.name}_predictions.csv"), index=False)
