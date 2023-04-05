@@ -69,14 +69,38 @@ def main(args):
     # Create dictionary with results
     dict_tmp = {
         "image": list_cropped_files,
-        "prediction": list_predictions
+        "score": list_predictions
     }
+
+    # Create dataframe
+    df_predictions = pd.DataFrame.from_dict(dict_tmp)
+
+    # Get micronuclei counts
+    df_predictions["micronuclei"] = df_predictions["score"].apply(lambda x: round(x) if x > 0.5 else 0)
+
+    # Get dataset summary
+    print("Calculating summary.")
+    df_summary = df_predictions["micronuclei"].value_counts()
+
+    total = df_summary.sum()
+    total_micronuclei = sum(df_summary.index * df_summary.values)
+    cells_with_micronuclei = df_summary[df_summary.index > 0].sum()
+    cells_with_micronuclei_ratio = cells_with_micronuclei / total
+    micronuclei_ratio = total_micronuclei / total
+
+    # Add summary to dataframe
+    df_summary["total_cells"] = total
+    df_summary["total_micronuclei"] = total_micronuclei
+    df_summary["cells_with_micronuclei"] = cells_with_micronuclei
+    df_summary["cells_with_micronuclei_ratio"] = cells_with_micronuclei_ratio
+    df_summary["micronuclei_ratio"] = micronuclei_ratio
+
 
     # Save output file
     print("Finished prediction. Saving output file.")
-    df_predictions = pd.DataFrame.from_dict(dict_tmp)
     args.out.mkdir(parents=True, exist_ok=True)
     df_predictions.to_csv(args.out.joinpath(f"{args.images.name}_predictions.csv"), index=False)
+    df_summary.to_csv(args.out.joinpath(f"{args.images.name}_summary.csv"), index=True)
 
 
 if __name__ == "__main__":
