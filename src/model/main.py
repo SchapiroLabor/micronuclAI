@@ -82,6 +82,7 @@ def main(args):
         val_set = torch.utils.data.Subset(data_valid, val_indices)
         test_set = torch.utils.data.Subset(data_valid, test_indices)
         datasets = (train_set, val_set, test_set)
+        print(len(train_set), len(val_set), len(test_set))
 
         # set hyper parameters
         hparams = {
@@ -102,30 +103,6 @@ def main(args):
         )
         trainer.fit(model)
 
-        # Evaluate the model
-        # validation_scores, validation_labels = model.get_val_pred_scores()
-        # dict_val_evaluation = evaluate_binary_model(validation_scores, validation_labels)
-        # df_val_evaluation = pd.DataFrame.from_dict(dict_val_evaluation)
-        # EVALUATION_FILE = RESULTS_FOLDER.joinpath(f"evaluation/validation_evaluation_scores_{str(k)}.csv")
-        # EVALUATION_FILE.parent.mkdir(parents=True, exist_ok=True)
-        # df_val_evaluation.to_csv(EVALUATION_FILE, index=False)
-
-        # Get test score
-
-        # tuple_scores = (test_scores, test_labels)
-        # SCORE_FILE = RESULTS_FOLDER.joinpath(f"test_scores_{str(k)}.p")
-        # SCORE_FILE.parent.mkdir(parents=True, exist_ok=True)
-        # pickle.dump(tuple_scores, open(SCORE_FILE, "wb"))
-
-        # Evaluate test
-        # dict_test_evaluation = evaluate_binary_model(test_scores, test_labels)
-        # df_test_evaluation = pd.DataFrame.from_dict(dict_test_evaluation)
-
-        # df_test_evaluation = pd.DataFrame.from_dict([test_scores, test_labels])
-        # RESULTS_FILE = RESULTS_FOLDER.joinpath(f"test_evaluation_scores_{str(k)}.csv")
-        #
-        # df_test_evaluation.to_csv(RESULTS_FILE, index=False)
-
         # Save test results and metrics
         TEST_METRICS = RESULTS_FOLDER.joinpath(f"test/test_scores_{str(k)}.csv")
         TEST_CONFMTRX = RESULTS_FOLDER.joinpath(f"test/test_confusion_matrix_{str(k)}.pdf")
@@ -134,7 +111,7 @@ def main(args):
         TEST_METRICS.parent.mkdir(parents=True, exist_ok=True)
         
         test_scores, test_labels = model.get_test_pred_scores()
-        df_test = pd.DataFrame([test_scores, test_labels]).T.rename(columns={0:"scores",1:"targets"})
+        df_test = pd.DataFrame([test_scores, test_labels]).T.rename(columns={0: "scores", 1: "targets"})
         df_test["targets"] = df_test["targets"].astype(int)
         df_test["rounded"] = df_test["scores"].apply(lambda x: round(x))
 
