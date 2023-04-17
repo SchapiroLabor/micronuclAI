@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+import pandas as pd
 import numpy as np
 import torchvision.models as models
 
@@ -11,7 +12,7 @@ class EfficientNetClassifier(nn.Module):
     def __init__(self, out_features):
         super().__init__()
 
-        self.model = models.efficientnet_b0(weights='IMAGENET1K_V1')
+        self.model = models.efficientnet_b0()
         self.model.classifier[1] = nn.Linear(in_features=1280, out_features=out_features)
 
         for param in self.model.parameters():
@@ -115,7 +116,13 @@ class BinaryClassifierModel(pl.LightningModule):
         labels = np.concatenate(labels, axis=0)
 
         self.model.train()
-        return scores, labels
+
+        # Convert to dataframe and round scores
+        df_val = pd.DataFrame([scores.squeeze(), labels]).T.rename(columns={0: "scores", 1: "target"})
+        df_val["target"] = df_val["target"].astype(int)
+        df_val["prediction"] = df_val["scores"].apply(lambda x: round(x))
+
+        return df_val
 
     def get_test_pred_scores(self, loader=None):
         self.model.eval()
@@ -137,7 +144,13 @@ class BinaryClassifierModel(pl.LightningModule):
         labels = np.concatenate(labels, axis=0)
 
         self.model.train()
-        return scores.squeeze(), labels
+
+        # Convert to dataframe and round scores
+        df_test = pd.DataFrame([scores.squeeze(), labels]).T.rename(columns={0: "scores", 1: "target"})
+        df_test["target"] = df_test["target"].astype(int)
+        df_test["prediction"] = df_test["scores"].apply(lambda x: round(x))
+
+        return df_test
 
     def reset_weights(self):
         self.model.reset_parameters()

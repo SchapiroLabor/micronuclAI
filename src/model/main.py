@@ -103,35 +103,60 @@ def main(args):
         )
         trainer.fit(model)
 
+        # Save model
+        MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model_{str(k)}.pt")
+        MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(model, MODEL_FILE)
+
+        ########################################
+        # FROM HERE ON TEST
+        # Create test folder if it does not exist
+        RESULTS_FOLDER.joinpath("test").mkdir(parents=True, exist_ok=True)
+
         # Save test results and metrics
         TEST_METRICS = RESULTS_FOLDER.joinpath(f"test/test_scores_{str(k)}.csv")
         TEST_CONFMTRX = RESULTS_FOLDER.joinpath(f"test/test_confusion_matrix_{str(k)}.pdf")
         TEST_PREDICTIONS = RESULTS_FOLDER.joinpath(f"test/test_predictions_{str(k)}.csv")
 
-        TEST_METRICS.parent.mkdir(parents=True, exist_ok=True)
-        
-        test_scores, test_labels = model.get_test_pred_scores()
-        df_test = pd.DataFrame([test_scores, test_labels]).T.rename(columns={0: "scores", 1: "targets"})
-        df_test["targets"] = df_test["targets"].astype(int)
-        df_test["rounded"] = df_test["scores"].apply(lambda x: round(x))
+        # Get test scores
+        df_test = model.get_test_pred_scores()
 
-        df_test_metrics = evaluate_multiclass_model(df_test["rounded"], df_test["targets"])
+        # Get test metrics
+        df_test_metrics = evaluate_multiclass_model(df_test["prediction"], df_test["target"])
         df_test_metrics.to_csv(TEST_METRICS, index=False)
 
         # Get plot for test data
-        fig = plot_confusion_matrix(df_test["rounded"], df_test["targets"])
+        fig = plot_confusion_matrix(df_test["prediction"], df_test["target"])
         fig.savefig(TEST_CONFMTRX, dpi=300)
 
-        # Save predictions
-        # df_test_predictions = pd.DataFrame([test_scores, test_labels], columns=["scores", "labels"])
+        # Save test predictions
         df_test.to_csv(TEST_PREDICTIONS, index=False)
 
+        ########################################
+        # FROM HERE ON VALIDATION
+        # Create validation folder if it does not exist
+        RESULTS_FOLDER.joinpath("validation").mkdir(parents=True, exist_ok=True)
+
+        # Save validation results and metrics
+        VAL_METRICS = RESULTS_FOLDER.joinpath(f"validation/val_scores_{str(k)}.csv")
+        VAL_CONFMTRX = RESULTS_FOLDER.joinpath(f"validation/val_confusion_matrix_{str(k)}.pdf")
+        VAL_PREDICTIONS = RESULTS_FOLDER.joinpath(f"validation/val_predictions_{str(k)}.csv")
+
+        # Get validation scores
+        df_val = model.get_val_pred_scores()
+
+        # Get validation metrics
+        df_val_metrics = evaluate_multiclass_model(df_val["prediction"], df_val["target"])
+        df_val_metrics.to_csv(VAL_METRICS, index=False)
+
+        # Get plot for validation data
+        fig = plot_confusion_matrix(df_val["prediction"], df_val["target"])
+        fig.savefig(VAL_CONFMTRX, dpi=300)
+
+        # Save validation predictions
+        df_val.to_csv(VAL_PREDICTIONS, index=False)
 
 
-        # Save model
-        MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model_{str(k)}.pt")
-        MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
-        torch.save(model, MODEL_FILE)
 
 
 if __name__ == "__main__":
