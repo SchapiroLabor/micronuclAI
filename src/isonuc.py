@@ -49,7 +49,7 @@ def get_options():
     # Parse arguments
     args = parser.parse_args()
 
-    # Stan dardize paths
+    # Standardize paths
     args.image = Path(args.image).resolve()
     args.mask = Path(args.mask).resolve()
     args.out = Path(args.out).resolve()
@@ -297,7 +297,7 @@ def main(args):
         # Scale image to 8bit for jpeg transform
         sc = exposure.rescale_intensity(sc, out_range=(0, 255)).astype(np.uint8)
 
-        # Save SC image, create output directory if it does not exists
+        # Save SC image, create output directory if it does not exist
         args.out.mkdir(parents=True, exist_ok=True)
         io.imsave(str(args.out.joinpath(f"{args.image.name.split('.')[0]}_{cellid}.png")), sc)
 
