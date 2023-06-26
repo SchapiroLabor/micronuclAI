@@ -30,7 +30,7 @@ def get_args():
                          help='Size of the extracted nuclei')
     options.add_argument('-e', '--expansion', dest='expansion', type=int, default=0,
                          help='Expansion of the bounding box in pixels')
-    options.add_argument('-sf', '--resizing_factor', dest='resizing_factor', type=float, default=1.0,
+    options.add_argument('-rf', '--resizing_factor', dest='resizing_factor', type=float, default=1.0,
                          help='Scale factor of the bounding box')
 
     # Tool output arguments

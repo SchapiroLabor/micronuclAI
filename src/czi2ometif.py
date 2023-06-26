@@ -23,6 +23,8 @@ def get_args():
                       help="Path to input .czi image.")
     tool.add_argument("-c", "--channel", dest="channel", action="store", required=False, type=int, default=None,
                         help="Channel to be used, if not channel provided all the image is saved.")
+    tool.add_argument("-s", "--series", dest="series", action="store", required=False, type=int, default=None,
+                        help="Series to be used, if not series provided the first series is used.")
 
     out = parser.add_argument_group(title="Output", description="Output files.")
     out.add_argument("-o", "--output", dest="output", action="store", required=True, type=str,
@@ -46,6 +48,11 @@ def main(args):
     # Deal with channels
     if args.channel is not None:
         img = img.get_image_data("YX", C=args.channel)
+        print(f"Image shape = {img.shape}")
+        img = AICSImage(img)
+
+    if args.series is not None:
+        img = img.get_image_data("YX", S=args.series)
         print(f"Image shape = {img.shape}")
         img = AICSImage(img)
 
