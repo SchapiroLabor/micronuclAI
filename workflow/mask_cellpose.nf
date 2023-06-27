@@ -26,7 +26,7 @@ process CELLPOSE_SEGMENTATION{
 	path '*.tif'
 
 	script:
-	def gpu = params.gpu ? "-g" : ""
+	def gpu = "${params.gpu}" ? "-g" : ""
 
 	"""
 	python $script -i input.ome.tif -o . $gpu
