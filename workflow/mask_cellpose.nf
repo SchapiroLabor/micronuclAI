@@ -2,7 +2,7 @@
 params.input = ""
 params.device = ""
 
-script = "/Users/miguelibarra/PycharmProjects/cin/src/segmentation_cellpose.py"
+script = "/home/hd/hd_hd/hd_hm294/cin/src/segmentation_cellpose.py"
 
 log.info """\
 	 CELPOSE SEGMENTATION PIPELINE

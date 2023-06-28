@@ -86,7 +86,7 @@ def main(args):
 
         # set hyper parameters
         hparams = {
-            "batch_size": 64,
+            "batch_size": 32,
             "learning_rate": 3e-4,
         }
 
