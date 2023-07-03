@@ -2,9 +2,15 @@
 params.input = ""
 params.c = ""
 params.s = ""
+<<<<<<< HEAD
 script = "/Users/miguelibarra/PycharmProjects/cin/src/czi2ometif.py"
 
 
+=======
+
+script = "$HOME/cin/src/czi2ometif.py"
+input_ch = Channel.fromPath(params.input)
+>>>>>>> ad8e9a9... Addapation to the server
 
 log.info """\
 	 CZI 2 OME.TIF-NF PIPELINE

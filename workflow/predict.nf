@@ -3,9 +3,14 @@ nextflow.enable.dsl=2
 params.input = ""
 params.model = ""
 params.device = "cpu"
+<<<<<<< HEAD
 
 project = "/Users/miguelibarra/PycharmProjects/cin/"
 script = "$project/src/model/prediction.py"
+=======
+params.output = ""
+script = "$HOME/cin/src/model/prediction.py"
+>>>>>>> ad8e9a9... Addapation to the server
 
 log.info """\
 	 PREDICTION
