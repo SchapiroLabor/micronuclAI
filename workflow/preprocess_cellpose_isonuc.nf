@@ -22,6 +22,7 @@ script_isonuc = "$project/src/extract_single_nuclei.py"
 script_prediction = "$project/src/model/prediction.py"
 
 
+
 log.info """\
 	 MICRONUCL(AI) PIPELINE
 	 =========================
@@ -32,7 +33,11 @@ log.info """\
 
 process CONVERT2OMETIF{
 	errorStrategy 'ignore'
+<<<<<<< HEAD
 	conda '${conda}/aicsimageio'
+=======
+	conda '/home/hd/hd_hd/hd_hm294/.conda/envs/aicsimageio'
+>>>>>>> 77112d2... for usage on cluster
 	publishDir "${params.input}/ometif", mode: "copy"
 
 	input:
@@ -53,7 +58,12 @@ process CONVERT2OMETIF{
 
 process CELLPOSE_SEGMENTATION{
 // 	errorStrategy 'ignore'
+<<<<<<< HEAD
 	conda '${conda}/stable'
+=======
+	queue 1
+	conda '/home/hd/hd_hd/hd_hm294/.conda/envs/cellpose'
+>>>>>>> 77112d2... for usage on cluster
 	publishDir "${params.input}/segmentation/cellpose", mode: "copy"
 
 	input:
@@ -72,7 +82,11 @@ process CELLPOSE_SEGMENTATION{
 
 process NUCLEAR_ISOLATION{
 //  	errorStrategy 'ignore'
+<<<<<<< HEAD
 	conda '${conda}/stable'
+=======
+	conda '/home/hd/hd_hd/hd_hm294/.conda/envs/cellpose'
+>>>>>>> 77112d2... for usage on cluster
 	publishDir "${params.input}/isonuc/", mode: "copy"
 
     // Define the inputs
@@ -91,8 +105,13 @@ process NUCLEAR_ISOLATION{
 }
 
 process PREDICTION{
+	queue 1
  	errorStrategy 'ignore'
+<<<<<<< HEAD
 	conda '${conda}/stable'
+=======
+	conda '/home/hd/hd_hd/hd_hm294/.conda/envs/pytorch_lt'
+>>>>>>> 77112d2... for usage on cluster
 	publishDir "${params.input}/predictions/", mode: "move"
 
     input:
