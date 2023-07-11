@@ -23,7 +23,8 @@ def get_args():
     input.add_argument("-i", "--image", dest="image", action="store", required=True,
                        help="Pathway to input image.")
     input.add_argument("-m", "--model", dest="model", action="store", required=False, default="nuclear",
-                       help="Model to be used for segmentation [degault='nuclear'].")
+                       choices=["nuclear", "mesmer"],
+                       help="Model to be used for segmentation [default='nuclear'].")
 
     optional = parser.add_argument_group(title="Optional arguments")
     optional.add_argument("-mpp", "--mpp", dest="mpp", action="store", required=False, default=0.65, type=float,

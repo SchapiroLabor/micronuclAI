@@ -9,18 +9,21 @@ params.rf = "0.7"
 params.e = "10"
 params.size = "256 256"
 
-params.model = "/Users/miguelibarra/PycharmProjects/cin/models/binary_10K/models/model_1.pt"
+project = "/Users/miguelibarra/PycharmProjects/cin"
+conda =  "/Users/miguelibarra/.miniconda3/envs/"
+
+params.model = "$project/models/binary_10K/models/model_1.pt"
 params.device = "mps"
 
 // Scripts
-script_convert = "/Users/miguelibarra/PycharmProjects/cin/src/czi2ometif.py"
-script_cellpose = "/Users/miguelibarra/PycharmProjects/cin/src/segmentation_cellpose.py"
-script_isonuc = "/Users/miguelibarra/PycharmProjects/cin/src/extract_single_nuclei.py"
-script_prediction = "/Users/miguelibarra/PycharmProjects/cin/src/model/prediction.py"
+script_convert = "$project/src/czi2ometif.py"
+script_cellpose = "$project/src/segmentation_cellpose.py"
+script_isonuc = "$project/src/extract_single_nuclei.py"
+script_prediction = "$project/src/model/prediction.py"
 
 
 log.info """\
-	 CZI 2 OME.TIF-NF PIPELINE
+	 MICRONUCL(AI) PIPELINE
 	 =========================
 	 input folder : ${params.input}
 	"""
@@ -29,7 +32,7 @@ log.info """\
 
 process CONVERT2OMETIF{
 	errorStrategy 'ignore'
-	conda '/Users/miguelibarra/.miniconda3/envs/aicsimageio'
+	conda '${conda}/aicsimageio'
 	publishDir "${params.input}/ometif", mode: "copy"
 
 	input:
@@ -50,7 +53,7 @@ process CONVERT2OMETIF{
 
 process CELLPOSE_SEGMENTATION{
 // 	errorStrategy 'ignore'
-	conda '/Users/miguelibarra/.miniconda3/envs/stable'
+	conda '${conda}/stable'
 	publishDir "${params.input}/segmentation/cellpose", mode: "copy"
 
 	input:
@@ -69,7 +72,7 @@ process CELLPOSE_SEGMENTATION{
 
 process NUCLEAR_ISOLATION{
 //  	errorStrategy 'ignore'
-	conda '/Users/miguelibarra/.miniconda3/envs/stable'
+	conda '${conda}/stable'
 	publishDir "${params.input}/isonuc/", mode: "copy"
 
     // Define the inputs
@@ -89,7 +92,7 @@ process NUCLEAR_ISOLATION{
 
 process PREDICTION{
  	errorStrategy 'ignore'
-	conda '/Users/miguelibarra/.miniconda3/envs/stable'
+	conda '${conda}/stable'
 	publishDir "${params.input}/predictions/", mode: "move"
 
     input:

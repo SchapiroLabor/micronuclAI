@@ -1,7 +1,6 @@
 #!/usr/bin/env nextflow
 params.input = ""
-params.output = ""
-params.gpu = ""
+params.device = ""
 
 script = "/Users/miguelibarra/PycharmProjects/cin/src/segmentation_cellpose.py"
 
@@ -9,7 +8,6 @@ log.info """\
 	 CELPOSE SEGMENTATION PIPELINE
 	 =========================
 	 input folder : ${params.input}
-	 output folder: ${params.output}
 	"""
 	.stripIndent()
 
@@ -17,7 +15,7 @@ log.info """\
 process CELLPOSE_SEGMENTATION{
 	errorStrategy 'ignore'
 	conda '/Users/miguelibarra/.miniconda3/envs/stable'
-	publishDir "${params.output}", mode: "move"
+	publishDir "${params.input}/segmentation/cellpose", mode: "move"
 	
 	input:
 	path (nuclear_image), stageAs: "input.ome.tif"
@@ -26,7 +24,7 @@ process CELLPOSE_SEGMENTATION{
 	path '*.tif'
 
 	script:
-	def gpu = "${params.gpu}" ? "-g" : ""
+	def gpu = "${params.device}" ? "-g" : ""
 
 	"""
 	python $script -i input.ome.tif -o . $gpu
@@ -35,7 +33,7 @@ process CELLPOSE_SEGMENTATION{
 
 
 workflow {
-    input_ch = Channel.fromPath(params.input)
+    input_ch = Channel.fromPath("${params.input}/ometif/*")
 	CELLPOSE_SEGMENTATION(input_ch)
 }
 

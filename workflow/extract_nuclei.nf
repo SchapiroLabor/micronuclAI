@@ -1,8 +1,7 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
-params.images = ""
-params.masks = ""
-params.output = ""
+params.input = ""
+params.segmentation = "cellpose"
 params.rf = "0.7"
 params.e = "10"
 params.s = "256 256"
@@ -11,9 +10,7 @@ script = "/Users/miguelibarra/PycharmProjects/cin/src/extract_single_nuclei.py"
 log.info """\
 	 NUCLEAR ISOLATION PIPELINE
 	 =========================
-	 input folder : ${params.images}
-	 masks folder : ${params.masks}
-	 output folder: ${params.output}
+	 input folder : ${params.input}
 	 expansion    : ${params.e}
 	 resize factor: ${params.rf}
 	"""
@@ -23,7 +20,7 @@ process NUCLEAR_ISOLATION{
  	// errorStrategy 'ignore'
 	conda '/Users/miguelibarra/.miniconda3/envs/stable'
 
-	publishDir "${params.output}/${mask.baseName}_e${params.e}_rf${params.rf}", mode: "move"
+	publishDir "${params.input}/isonuc/${params.segmentation}_${mask.baseName}_e${params.e}_rf${params.rf}", mode: "move"
 
     // Define the inputs
     input:
@@ -40,10 +37,10 @@ process NUCLEAR_ISOLATION{
 }
 
 workflow {
-	mych = Channel.fromPath("${params.masks}")
+	mych = Channel.fromPath("${params.input}/segmentation/${params.segmentation}/*.tif")
     .map{ m ->
       def base = m.baseName
-      [mask:m,  image:file("${params.images}/${base}.ome.tif")]
+      [mask:m,  image:file("${params.input}/ometif/${base}.ome.tif")]
     }
 
   NUCLEAR_ISOLATION(mych)

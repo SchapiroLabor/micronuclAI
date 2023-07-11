@@ -1,27 +1,27 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
-params.images = ""
+params.input = ""
 params.model = ""
 params.device = "cpu"
-params.output = ""
-script = "/Users/miguelibarra/PycharmProjects/cin/src/model/prediction.py"
+
+project = "/Users/miguelibarra/PycharmProjects/cin/"
+script = "$project/src/model/prediction.py"
 
 log.info """\
 	 PREDICTION
 	 =========================
-	 input folder  = ${params.images}
+	 input folder  = ${params.input}
 	 model pathway = ${params.model}
-	 output folder = ${params.output}
 	 device        = ${params.device}
 	"""
 	.stripIndent()
 
 process PREDICTION{
- 	errorStrategy 'ignore'
+    queue 1
 	conda '/Users/miguelibarra/.miniconda3/envs/stable'
-	publishDir "${params.output}", mode: "move"
+	publishDir "${params.input}/predictions", mode: "move"
 
-    input
+    input:
     path (images)
 
     // Define outputs
@@ -36,7 +36,7 @@ process PREDICTION{
 }
 
 workflow {
-    input_ch = Channel.fromPath("${params.images}")
+    input_ch = Channel.fromPath("${params.input}/isonuc/*", type: "dir")
     PREDICTION(input_ch)
 }
 
