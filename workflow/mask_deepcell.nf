@@ -4,8 +4,8 @@ params.deepcell = ""
 params.mpp = "0.65"
 params.compartment = ""
 
-project = "$HOME/PycharmProjects/cin"
-conda =  "$HOME/.miniconda3/envs/"
+project = "$HOME/cin"
+conda =  "$HOME/.conda/envs/"
 
 script_deepcell = "$project/src/segmentation_deepcell.py"
 
@@ -17,7 +17,7 @@ log.info """\
 	.stripIndent()
 
 process SEGMENTATION_DEEPCELL{
-	errorStrategy 'ignore'
+// 	errorStrategy 'ignore'
 	conda '${conda}/deepcell'
 	publishDir "${params.input}/segmentation/${params.deepcell}${params.compartment}", mode: "move"
 
