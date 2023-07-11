@@ -28,7 +28,7 @@ process SEGMENTATION_DEEPCELL{
 	path '*.tif'
 
 	script:
-	def deepcell = "${params.deepcell}" ? "-d ${params.deepcell}" : ""
+	def deepcell = "${params.deepcell}" ? "-m ${params.deepcell}" : ""
 	def compartment = "${params.compartment}" ? "-c ${params.compartment}" : ""
 
 	"""
