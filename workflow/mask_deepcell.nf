@@ -3,8 +3,11 @@ params.input = ""
 params.deepcell = ""
 params.mpp = "0.65"
 params.compartment = ""
-script = "/Users/miguelibarra/PycharmProjects/cin/src/segmentation_deepcell.py"
 
+project = "/Users/miguelibarra/PycharmProjects/cin"
+conda =  "/Users/miguelibarra/.miniconda3/envs/"
+
+script_deepcell = "$project/src/segmentation_deepcell.py"
 
 log.info """\
 	 CELPOSE SEGMENTATION PIPELINE
@@ -13,9 +16,9 @@ log.info """\
 	"""
 	.stripIndent()
 
-process CELLPOSE_SEGMENTATION{
+process SEGMENTATION_DEEPCELL{
 	errorStrategy 'ignore'
-	conda '/Users/miguelibarra/.miniconda3/envs/stable'
+	conda '${conda}/deepcell'
 	publishDir "${params.input}/segmentation/${params.deepcell}${params.compartment}", mode: "move"
 
 	input:
@@ -29,11 +32,11 @@ process CELLPOSE_SEGMENTATION{
 	def compartment = "${params.compartment}" ? "-c ${params.compartment}" : ""
 
 	"""
-	python $script -i input.ome.tif -o . -m $params.mpp $deepcell $compartment
+	python $script_deepcell -i input.ome.tif -o . -m $params.mpp $deepcell $compartment
 	"""
 }
 
 workflow {
     input_ch = Channel.fromPath("${params.input}/ometif/*")
-    CELLPOSE_SEGMENTATION(input_ch)
+    SEGMENTATION_DEEPCELL(input_ch)
 }
