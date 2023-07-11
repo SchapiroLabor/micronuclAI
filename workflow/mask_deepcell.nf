@@ -4,8 +4,8 @@ params.deepcell = ""
 params.mpp = "0.65"
 params.compartment = ""
 
-project = "/Users/miguelibarra/PycharmProjects/cin"
-conda =  "/Users/miguelibarra/.miniconda3/envs/"
+project = "$HOME/PycharmProjects/cin"
+conda =  "$HOME/.miniconda3/envs/"
 
 script_deepcell = "$project/src/segmentation_deepcell.py"
 
@@ -32,7 +32,7 @@ process SEGMENTATION_DEEPCELL{
 	def compartment = "${params.compartment}" ? "-c ${params.compartment}" : ""
 
 	"""
-	python $script_deepcell -i input.ome.tif -o . -m $params.mpp $deepcell $compartment
+	python $script_deepcell -i input.ome.tif -o . -mpp $params.mpp $deepcell $compartment
 	"""
 }
 

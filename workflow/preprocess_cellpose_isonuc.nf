@@ -9,8 +9,8 @@ params.rf = "0.7"
 params.e = "10"
 params.size = "256 256"
 
-project = "/Users/miguelibarra/PycharmProjects/cin"
-conda =  "/Users/miguelibarra/.miniconda3/envs/"
+project = "$HOME/PycharmProjects/cin"
+conda =  "$HOME/.miniconda3/envs/"
 
 params.model = "$project/models/binary_10K/models/model_1.pt"
 params.device = "mps"
