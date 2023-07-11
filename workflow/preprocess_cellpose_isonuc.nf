@@ -3,14 +3,12 @@ params.input = ""
 params.c = ""
 params.s = ""
 
-params.gpu = ""
-
 params.rf = "0.7"
 params.e = "10"
 params.size = "256 256"
 
-project = "$HOME/PycharmProjects/cin"
-conda =  "$HOME/.miniconda3/envs/"
+project = "$HOME/cin"
+conda =  "$HOME/.conda/envs/"
 
 params.model = "$project/models/binary_10K/models/model_1.pt"
 params.device = "mps"
@@ -33,11 +31,7 @@ log.info """\
 
 process CONVERT2OMETIF{
 	errorStrategy 'ignore'
-<<<<<<< HEAD
 	conda '${conda}/aicsimageio'
-=======
-	conda '/home/hd/hd_hd/hd_hm294/.conda/envs/aicsimageio'
->>>>>>> 77112d2... for usage on cluster
 	publishDir "${params.input}/ometif", mode: "copy"
 
 	input:
@@ -58,12 +52,7 @@ process CONVERT2OMETIF{
 
 process CELLPOSE_SEGMENTATION{
 // 	errorStrategy 'ignore'
-<<<<<<< HEAD
-	conda '${conda}/stable'
-=======
-	queue 1
-	conda '/home/hd/hd_hd/hd_hm294/.conda/envs/cellpose'
->>>>>>> 77112d2... for usage on cluster
+	conda '${conda}/cellpose'
 	publishDir "${params.input}/segmentation/cellpose", mode: "copy"
 
 	input:
@@ -82,11 +71,7 @@ process CELLPOSE_SEGMENTATION{
 
 process NUCLEAR_ISOLATION{
 //  	errorStrategy 'ignore'
-<<<<<<< HEAD
-	conda '${conda}/stable'
-=======
-	conda '/home/hd/hd_hd/hd_hm294/.conda/envs/cellpose'
->>>>>>> 77112d2... for usage on cluster
+	conda '${conda}/cellpose'
 	publishDir "${params.input}/isonuc/", mode: "copy"
 
     // Define the inputs
@@ -105,13 +90,8 @@ process NUCLEAR_ISOLATION{
 }
 
 process PREDICTION{
-	queue 1
- 	errorStrategy 'ignore'
-<<<<<<< HEAD
-	conda '${conda}/stable'
-=======
-	conda '/home/hd/hd_hd/hd_hm294/.conda/envs/pytorch_lt'
->>>>>>> 77112d2... for usage on cluster
+//  	errorStrategy 'ignore'
+	conda '${conda}/pytorch_lt'
 	publishDir "${params.input}/predictions/", mode: "move"
 
     input:
