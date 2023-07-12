@@ -1,14 +1,14 @@
 #!/usr/bin/env nextflow
 params.input = ""
 params.device = ""
-parmas.cp_model = "nuclei"
+params.cp_model = "nuclei"
 
 conda = "$HOME/.conda/envs"
 project = "$HOME/cin"
 script = "$project/src/segmentation_cellpose.py"
 
 log.info """\
-	 CELPOSE SEGMENTATION PIPELINE
+	 CELLPOSE SEGMENTATION PIPELINE
 	 =========================
 	 input folder : ${params.input}
 	"""
@@ -17,7 +17,7 @@ log.info """\
 
 process CELLPOSE_SEGMENTATION{
 	errorStrategy 'ignore'
-	conda '${conda}/stable'
+	conda "${conda}/cellpose"
 	publishDir "${params.input}/segmentation/cellpose_${params.cp_model}", mode: "move"
 	
 	input:

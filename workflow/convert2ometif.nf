@@ -17,7 +17,7 @@ log.info """\
 
 process CONVERTCZI2TIF{
 // 	errorStrategy 'ignore'
-	conda '${conda}/aicsimageio'
+	conda "${conda}/aicsimageio"
 	publishDir "${params.input}/ometif", mode: "move"
 	
 	input:
