@@ -16,7 +16,7 @@ log.info """\
 
 
 process CELLPOSE_SEGMENTATION{
-	errorStrategy 'ignore'
+//	errorStrategy 'ignore'
 	conda "${conda}/cellpose"
 	publishDir "${params.input}/segmentation/cellpose_${params.cp_model}", mode: "move"
 	
@@ -28,9 +28,10 @@ process CELLPOSE_SEGMENTATION{
 
 	script:
 	def gpu = "${params.device}" ? "-g" : ""
+	def cp_model = "${params.cp_model}" ? "-m ${params.cp_model}" : ""
 
 	"""
-	python $script -i input.ome.tif -o . $gpu $params.cp_model
+	python $script -i input.ome.tif -o . $gpu $cp_model
 	"""
 }
 
