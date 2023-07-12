@@ -28,6 +28,8 @@ def get_args():
     input.add_argument("-m", "--model", dest="model", action="store", required=False, default="nuclei",
                        choices=["nuclei", "cyto", "cyto2"],
                        help="Model to be used for segmentation [default='nuclei'].")
+    input.add_argument("-d", "--diameter", dest="diameter", action="store", required=False, default=None, type=float,
+                          help="Diameter of the nuclei [default=None].")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -59,7 +61,7 @@ def main(args):
 
     # Predict nuclei in image
     print("Predicting")
-    masks, flows, styles, diams = model.eval(img, channels=[0, 2], diameter=None)
+    masks, flows, styles, diams = model.eval(img, channels=[0, 2], diameter=args.diameter)
 
     # Create output folder if it does not exist
     Path(args.out).mkdir(parents=True, exist_ok=True)
