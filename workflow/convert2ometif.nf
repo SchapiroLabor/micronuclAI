@@ -2,18 +2,13 @@
 params.input = ""
 params.c = ""
 params.s = ""
-<<<<<<< HEAD
-script = "/Users/miguelibarra/PycharmProjects/cin/src/czi2ometif.py"
 
-
-=======
-
-script = "$HOME/cin/src/czi2ometif.py"
-input_ch = Channel.fromPath(params.input)
->>>>>>> ad8e9a9... Addapation to the server
+conda = "$HOME/.conda/envs"
+project = "$HOME/cin"
+script = "$project/src/czi2ometif.py"
 
 log.info """\
-	 CZI 2 OME.TIF-NF PIPELINE
+	 CONVERT 2 OME.TIF-NF PIPELINE
 	 =========================
 	 input folder : ${params.input}
 	"""
@@ -22,7 +17,7 @@ log.info """\
 
 process CONVERTCZI2TIF{
 // 	errorStrategy 'ignore'
-	conda '/Users/miguelibarra/.miniconda3/envs/aicsimageio'
+	conda '${conda}/aicsimageio'
 	publishDir "${params.input}/ometif", mode: "move"
 	
 	input:
