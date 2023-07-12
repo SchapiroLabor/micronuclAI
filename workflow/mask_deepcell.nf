@@ -18,7 +18,7 @@ log.info """\
 
 process SEGMENTATION_DEEPCELL{
 // 	errorStrategy 'ignore'
-	conda '${conda}/deepcell'
+	conda "${conda}/deepcell"
 	publishDir "${params.input}/segmentation/${params.deepcell}${params.compartment}", mode: "move"
 
 	input:
