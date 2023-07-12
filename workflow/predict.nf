@@ -4,7 +4,8 @@ params.input = ""
 params.model = ""
 params.device = "cpu"
 
-project = "/Users/miguelibarra/PycharmProjects/cin/"
+conda = "$HOME/.conda/envs"
+project = "$HOME/cin"
 script = "$project/src/model/prediction.py"
 
 log.info """\
@@ -17,8 +18,7 @@ log.info """\
 	.stripIndent()
 
 process PREDICTION{
-    queue 1
-	conda '/Users/miguelibarra/.miniconda3/envs/stable'
+	conda "${conda}/pytorch_lt"
 	publishDir "${params.input}/predictions", mode: "move"
 
     input:
