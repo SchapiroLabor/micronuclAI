@@ -1,27 +1,29 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 params.input = ""
-params.segmentation = "cellpose"
+params.segmentation = "cellpose_nuclei"
 params.rf = "0.7"
 params.e = "10"
 params.s = "256 256"
 
+conda = "$HOME/.conda/envs"
 project = "$HOME/cin"
-script = "$Hproject/src/extract_single_nuclei.py"
+script = "$project/src/extract_single_nuclei.py"
 
 log.info """\
 	 NUCLEAR ISOLATION PIPELINE
 	 =========================
 	 input folder : ${params.input}
-	 expansion    : ${params.e}
+	 segmentation : ${params.segmentation}
 	 resize factor: ${params.rf}
+	 expansion    : ${params.e}
+	 size         : ${params.s}
 	"""
 	.stripIndent()
 
 process NUCLEAR_ISOLATION{
  	// errorStrategy 'ignore'
-	conda '/Users/miguelibarra/.miniconda3/envs/stable'
-
+	conda "${conda}/cellpose"
 	publishDir "${params.input}/isonuc/${params.segmentation}_${mask.baseName}_e${params.e}_rf${params.rf}", mode: "move"
 
     // Define the inputs
