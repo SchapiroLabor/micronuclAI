@@ -1,8 +1,11 @@
 #!/usr/bin/env nextflow
 params.input = ""
 params.device = ""
+parmas.cp_model = "nuclei"
 
-script = "/home/hd/hd_hd/hd_hm294/cin/src/segmentation_cellpose.py"
+conda = "$HOME/.conda/envs"
+project = "$HOME/cin"
+script = "$project/src/segmentation_cellpose.py"
 
 log.info """\
 	 CELPOSE SEGMENTATION PIPELINE
@@ -14,8 +17,8 @@ log.info """\
 
 process CELLPOSE_SEGMENTATION{
 	errorStrategy 'ignore'
-	conda '/Users/miguelibarra/.miniconda3/envs/stable'
-	publishDir "${params.input}/segmentation/cellpose", mode: "move"
+	conda '${conda}/stable'
+	publishDir "${params.input}/segmentation/cellpose_${params.cp_model}", mode: "move"
 	
 	input:
 	path (nuclear_image), stageAs: "input.ome.tif"
@@ -27,7 +30,7 @@ process CELLPOSE_SEGMENTATION{
 	def gpu = "${params.device}" ? "-g" : ""
 
 	"""
-	python $script -i input.ome.tif -o . $gpu
+	python $script -i input.ome.tif -o . $gpu $params.cp_model
 	"""
 }
 

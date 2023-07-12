@@ -5,7 +5,9 @@ params.segmentation = "cellpose"
 params.rf = "0.7"
 params.e = "10"
 params.s = "256 256"
-script = "$HOME/cin/src/extract_single_nuclei.py"
+
+project = "$HOME/cin"
+script = "$Hproject/src/extract_single_nuclei.py"
 
 log.info """\
 	 NUCLEAR ISOLATION PIPELINE

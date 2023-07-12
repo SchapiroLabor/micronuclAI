@@ -23,10 +23,11 @@ def get_args():
     # Tool Input
     input = parser.add_argument_group(title="Input")
     input.add_argument("-i", "--image", dest="image", action="store", required=True, help="Pathway to input image.")
-    input.add_argument("-c", "--channel", dest="channel", action="store", type=int, required=False, default=None,
-                       help="Channel to be used in the original image.")
     input.add_argument("-g", "--gpu", dest="gpu", action="store_true", default=False, required=False,
                        help="Use gpu for inference acceleration.")
+    input.add_argument("-m", "--model", dest="model", action="store", required=False, default="nuclei",
+                       choices=["nuclei", "cyto", "cyto2"],
+                       help="Model to be used for segmentation [default='nuclei'].")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -45,14 +46,15 @@ def get_args():
 
 def main(args):
     # Load model
-    print(f"Loading Model with gpu: {args.gpu}")
-    model = models.Cellpose(model_type='nuclei', gpu=args.gpu)
+    print(f"Loading Model with gpu = {args.gpu}")
+    print(f"Loading Model          = {args.model}")
+    model = models.Cellpose(model_type=args.model, gpu=args.gpu)
 
     # Read in data, it most be contained in a list object for evaluation
     print("Reading image")
     img = io.imread(args.image)
 
-    print(f"Image with shape: {img.shape}")
+    print(f"Image with shape        = {img.shape}")
     img = [img]
 
     # Predict nuclei in image
