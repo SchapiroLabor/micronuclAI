@@ -24,7 +24,7 @@ log.info """\
 process NUCLEAR_ISOLATION{
  	// errorStrategy 'ignore'
 	conda "${conda}/cellpose"
-	publishDir "${params.input}/isonuc/${params.segmentation}_${mask.baseName}_e${params.e}_rf${params.rf}", mode: "move"
+	publishDir "${params.input}/isonuc/${params.segmentation}/${mask.baseName}_e${params.e}_rf${params.rf}", mode: "move"
 
     // Define the inputs
     input:

@@ -3,6 +3,7 @@ nextflow.enable.dsl=2
 params.input = ""
 params.model = ""
 params.device = "cpu"
+params.segmentation = "cellpose_nuclei"
 
 conda = "$HOME/.conda/envs"
 project = "$HOME/cin"
@@ -19,7 +20,7 @@ log.info """\
 
 process PREDICTION{
 	conda "${conda}/pytorch_lt"
-	publishDir "${params.input}/predictions", mode: "move"
+	publishDir "${params.input}/predictions/${params.segmentation}", mode: "move"
 
     input:
     path (images)
@@ -36,7 +37,7 @@ process PREDICTION{
 }
 
 workflow {
-    input_ch = Channel.fromPath("${params.input}/isonuc/*", type: "dir")
+    input_ch = Channel.fromPath("${params.input}/isonuc/${params.segmentation}/*", type: "dir")
     PREDICTION(input_ch)
 }
 
