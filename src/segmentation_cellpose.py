@@ -23,13 +23,13 @@ def get_args():
     # Tool Input
     input = parser.add_argument_group(title="Input")
     input.add_argument("-i", "--image", dest="image", action="store", required=True, help="Pathway to input image.")
-    input.add_argument("-g", "--gpu", dest="gpu", action="store_true", default=False, required=False,
+    input.add_argument("-d", "--device", dest="device", action="store", default=None, required=False,
                        help="Use gpu for inference acceleration.")
     input.add_argument("-m", "--model", dest="model", action="store", required=False, default="nuclei",
                        choices=["nuclei", "cyto", "cyto2"],
                        help="Model to be used for segmentation [default='nuclei'].")
-    input.add_argument("-d", "--diameter", dest="diameter", action="store", required=False, default=None, type=float,
-                          help="Diameter of the nuclei [default=None].")
+    input.add_argument("-dm", "--diameter", dest="diameter", action="store", required=False, default=None, type=float,
+                       help="Diameter of the nuclei [default=None].")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -48,25 +48,29 @@ def get_args():
 
 def main(args):
     # Load model
-    print(f"Loading Model with gpu = {args.gpu}")
-    print(f"Loading Model          = {args.model}")
-    model = models.Cellpose(model_type=args.model, gpu=args.gpu)
+    print(f"Loading Model with device = {args.device}")
+    print(f"Loading Model             = {args.model}")
+    model = models.Cellpose(model_type=args.model, device=torch.device(args.device), gpu=True)
 
     # Read in data, it most be contained in a list object for evaluation
-    print("Reading image")
+    print(f"Reading image from        = {args.image}")
     img = io.imread(args.image)
 
-    print(f"Image with shape        = {img.shape}")
+    print(f"Image with shape          = {img.shape}")
     img = [img]
 
     # Predict nuclei in image
     print("Predicting")
-    masks, flows, styles, diams = model.eval(img, channels=[0, 2], diameter=args.diameter)
+    masks, flows, styles, diams = model.eval(img, channels=[0, 0], diameter=args.diameter, flow_threshold=1)
+    print(f"Predicted mask with shape = {masks[0].shape}")
+    print(f"Predicted diams used      = {diams}")
+    print(f"Predicted masks           = {masks[0].max()}")
 
     # Create output folder if it does not exist
     Path(args.out).mkdir(parents=True, exist_ok=True)
 
     # Save mask file in tif format
+    print(f"Saving mask to             = {args.out}")
     io.imsave(args.out.joinpath(f"{args.image.name.split('.')[0]}.tif"), masks[0])
 
 

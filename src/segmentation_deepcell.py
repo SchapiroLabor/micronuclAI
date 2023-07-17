@@ -23,14 +23,12 @@ def get_args():
     input.add_argument("-i", "--image", dest="image", action="store", required=True,
                        help="Pathway to input image.")
     input.add_argument("-m", "--model", dest="model", action="store", required=False, default="nuclear",
-                       choices=["nuclear", "mesmer"],
+                       choices=["nuclear", "mesmer_nuclear", "mesmer_whole-cell"],
                        help="Model to be used for segmentation [default='nuclear'].")
 
     optional = parser.add_argument_group(title="Optional arguments")
     optional.add_argument("-mpp", "--mpp", dest="mpp", action="store", required=False, default=0.65, type=float,
                           help="Microns per pixel of the image [default=0.65].")
-    optional.add_argument("-c", "--compartment", dest="compartment", action="store", required=False, default="nuclear",
-                          help="Compartment to be segmented [default='nuclear'].")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -52,24 +50,35 @@ def main(args):
     print(f"Reading image from    = {args.image}")
     img = imread(args.image)
     print(f"Image with shape      = {img.shape}")
-
-    # Expand image dimensions to rank 4
-    img = np.expand_dims(img, axis=-1)
-    img = np.expand_dims(img, axis=0)
-
-    # Create the application
     print(f"Predicting with model = {args.model}")
     print(f"Image mpp             = {args.mpp}")
 
     if args.model == "nuclear":
+        # Expand image dimensions to rank 4
+        img = np.expand_dims(img, axis=-1)
+        img = np.expand_dims(img, axis=0)
+
+        # Load model and predict
         app = NuclearSegmentation()
         labeled_image = app.predict(img, image_mpp=args.mpp)
-    elif args.model == "mesmer":
+
+    elif args.model.startswith("mesmer"):
+        # Stack images
+        img = np.stack((img, img), axis=-1)
+        img = np.expand_dims(img, axis=0)
+
+        # Get compartment name
+        compartment = args.model.split("_")[1]
+
+        # Load model and predict
         app = Mesmer()
-        labeled_image = app.predict(img, image_mpp=args.mpp, compartment=args.compartment)
+        labeled_image = app.predict(img, image_mpp=args.mpp, compartment=compartment, batch_size=8)
 
     # Save the label image
     mask = labeled_image[0, :, :, 0]
+    print(f"Mask with shape       = {mask.shape}")
+    print(f"Predicted masks       = {mask.max()}")
+    print(f"Saving mask to        = {args.out}")
     args.out.mkdir(parents=True, exist_ok=True)
     imsave(args.out.joinpath(f"{args.image.name.split('.')[0]}.tif"), mask)
 
