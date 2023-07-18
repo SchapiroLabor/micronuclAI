@@ -1,8 +1,9 @@
 #!/usr/bin/env nextflow
 params.input = ""
-params.device = ""
-params.cp_model = "nuclei"
+params.device = "cpu"
+params.segmentation = ""
 params.cp_diameter = ""
+params.batch_size = ""
 
 conda = "$HOME/.conda/envs"
 project = "$HOME/cin"
@@ -19,7 +20,7 @@ log.info """\
 process CELLPOSE_SEGMENTATION{
 //	errorStrategy 'ignore'
 	conda "${conda}/cellpose"
-	publishDir "${params.input}/segmentation/cellpose_${params.cp_model}", mode: "move"
+	publishDir "${params.input}/segmentation/cellpose_${params.segmentation}", mode: "move"
 	
 	input:
 	path (nuclear_image), stageAs: "input.ome.tif"
@@ -28,12 +29,12 @@ process CELLPOSE_SEGMENTATION{
 	path '*.tif'
 
 	script:
-	def gpu = "${params.device}" ? "-g" : ""
-	def cp_model = "${params.cp_model}" ? "-m ${params.cp_model}" : ""
-	def cp_diameter = "${params.cp_diameter}" ? "-d ${params.cp_diameter}" : ""
+	def segmentation = "${params.segmentation}" ? "-m ${params.segmentation}" : ""
+	def batch_size = "${params.batch_size}" ? "-bs ${params.batch_size}" : ""
+	def cp_diameter = "${params.cp_diameter}" ? "-dm ${params.cp_diameter}" : ""
 
 	"""
-	python $script -i input.ome.tif -o . $gpu $cp_model $cp_diameter
+	python $script -i input.ome.tif -o . -d $params.device $segmentation $cp_diameter $batch_size
 	"""
 }
 

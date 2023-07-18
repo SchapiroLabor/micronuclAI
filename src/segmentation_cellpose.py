@@ -8,8 +8,6 @@ import torch
 from skimage import io
 from cellpose import models
 from PIL import Image
-from aicsimageio import AICSImage
-from aicsimageio.writers import OmeTiffWriter
 
 
 # Parsing input file and parameters
@@ -30,6 +28,13 @@ def get_args():
                        help="Model to be used for segmentation [default='nuclei'].")
     input.add_argument("-dm", "--diameter", dest="diameter", action="store", required=False, default=None, type=float,
                        help="Diameter of the nuclei [default=None].")
+
+    # Cellpose options
+    optional = parser.add_argument_group(title="Cellpose options")
+    optional.add_argument("-ft", "--flow-threshold", dest="flow_threshold", action="store", required=False, default=0.4,
+                          type=float, help="Flow threshold to be used for calculations. [default=0.4]")
+    optional.add_argument("-bs", "--batch-size", dest="batch_size", action="store", required=False, default=8,
+                          type=int, help="Batch size [default=8]")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -61,7 +66,12 @@ def main(args):
 
     # Predict nuclei in image
     print("Predicting")
-    masks, flows, styles, diams = model.eval(img, channels=[0, 0], diameter=args.diameter, flow_threshold=1)
+    masks, flows, styles, diams = model.eval(img, 
+                                            channels=[0, 0], 
+                                            diameter=args.diameter, 
+                                            flow_threshold=args.flow_threshold,
+                                            batch_size=args.batch_size)
+
     print(f"Predicted mask with shape = {masks[0].shape}")
     print(f"Predicted diams used      = {diams}")
     print(f"Predicted masks           = {masks[0].max()}")
