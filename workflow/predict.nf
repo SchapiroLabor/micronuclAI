@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 params.input = ""
 params.model = ""
 params.device = "cpu"
-params.segmentation = "cellpose_nuclei"
+params.segmentation = ""
 
 conda = "$HOME/.conda/envs"
 project = "$HOME/cin"
@@ -19,7 +19,7 @@ log.info """\
 	.stripIndent()
 
 process PREDICTION{
-	conda "${conda}/pytorch_lt"
+	conda "${conda}/prediction"
 	publishDir "${params.input}/predictions/${params.segmentation}", mode: "move"
 
     input:
