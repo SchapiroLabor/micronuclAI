@@ -26,9 +26,11 @@ def get_args():
                        choices=["nuclear", "mesmer_nuclear", "mesmer_whole-cell"],
                        help="Model to be used for segmentation [default='nuclear'].")
 
-    optional = parser.add_argument_group(title="Optional arguments")
+    optional = parser.add_argument_group(title="Deepcell arguments")
     optional.add_argument("-mpp", "--mpp", dest="mpp", action="store", required=False, default=0.65, type=float,
                           help="Microns per pixel of the image [default=0.65].")
+    optional.add_argument("-bs", "--batch-size", dest="batch_size", action="store", required=False, default=4,
+                          type=int, help="Batch size [default=4]")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -72,7 +74,10 @@ def main(args):
 
         # Load model and predict
         app = Mesmer()
-        labeled_image = app.predict(img, image_mpp=args.mpp, compartment=compartment, batch_size=8)
+        labeled_image = app.predict(img, 
+                                    image_mpp=args.mpp,
+                                    compartment=compartment,
+                                    batch_size=args.batch_size)
 
     # Save the label image
     mask = labeled_image[0, :, :, 0]

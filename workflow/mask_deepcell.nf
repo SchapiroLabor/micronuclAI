@@ -1,8 +1,8 @@
 #!/usr/bin/env nextflow
 params.input = ""
-params.deepcell = ""
-params.mpp = "0.65"
-params.compartment = ""
+params.segmentation = ""
+params.mpp = ""
+params.batch_size = ""
 
 project = "$HOME/cin"
 conda =  "$HOME/.conda/envs/"
@@ -10,7 +10,7 @@ conda =  "$HOME/.conda/envs/"
 script_deepcell = "$project/src/segmentation_deepcell.py"
 
 log.info """\
-	 CELPOSE SEGMENTATION PIPELINE
+	 DEEPCELL SEGMENTATION PIPELINE
 	 =========================
 	 input folder : ${params.input}
 	"""
@@ -19,7 +19,7 @@ log.info """\
 process SEGMENTATION_DEEPCELL{
 // 	errorStrategy 'ignore'
 	conda "${conda}/deepcell"
-	publishDir "${params.input}/segmentation/${params.deepcell}${params.compartment}", mode: "move"
+	publishDir "${params.input}/segmentation/deepcell_${params.segmentation}", mode: "move"
 
 	input:
 	path (nuclear_image), stageAs: "input.ome.tif"
@@ -28,11 +28,12 @@ process SEGMENTATION_DEEPCELL{
 	path '*.tif'
 
 	script:
-	def deepcell = "${params.deepcell}" ? "-m ${params.deepcell}" : ""
-	def compartment = "${params.compartment}" ? "-c ${params.compartment}" : ""
+	def model = "${params.segmentation}" ? "-m ${params.segmentation}" : ""
+	def batch_size = "${params.batch_size}" ? "-bs ${params.batch_size}" : ""
+	def mpp = "${params.mpp}" ? "-mpp ${params.mpp}" : ""
 
 	"""
-	python $script_deepcell -i input.ome.tif -o . -mpp $params.mpp $deepcell $compartment
+	python $script_deepcell -i input.ome.tif -o . -mpp $params.mpp $model $batch_size
 	"""
 }
 
