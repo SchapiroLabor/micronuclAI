@@ -4,7 +4,6 @@ import time
 from pathlib import Path
 
 # External librarires
-import matplotlib.pyplot as plt
 from skimage.io import imread, imsave
 from deepcell.applications import NuclearSegmentation, Mesmer
 import numpy as np
