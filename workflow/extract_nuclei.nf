@@ -36,7 +36,7 @@ process NUCLEAR_ISOLATION{
     file "*.png"
 
     script:
-    def fb = params.fb ? "-fb ${params.fb}" : ""
+    def fb = params.fb ? "-fb" : ""
 	"""
 	python $script -m $mask -i $image -s $params.s -e $params.e -rf $params.rf  -o ./$mask.baseName $fb
 	"""
