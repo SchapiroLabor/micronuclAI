@@ -5,6 +5,7 @@ params.segmentation = "cellpose_nuclei"
 params.rf = "0.7"
 params.e = "10"
 params.s = "256 256"
+params.fb = ""
 
 conda = "$HOME/.conda/envs"
 project = "$HOME/cin"
@@ -35,8 +36,9 @@ process NUCLEAR_ISOLATION{
     file "*.png"
 
     script:
+    def fb = params.fb ? "-fb ${params.fb}" : ""
 	"""
-	python $script -m $mask -i $image -s $params.s -e $params.e -rf $params.rf  -o ./$mask.baseName
+	python $script -m $mask -i $image -s $params.s -e $params.e -rf $params.rf  -o ./$mask.baseName $fb
 	"""
 }
 
