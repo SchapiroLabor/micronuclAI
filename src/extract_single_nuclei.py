@@ -32,6 +32,8 @@ def get_args():
                          help='Expansion of the bounding box in pixels')
     options.add_argument('-rf', '--resizing_factor', dest='resizing_factor', type=float, default=1.0,
                          help='Scale factor of the bounding box')
+    options.add_argument('-fb', '--filter_bboxes', dest='filter_bboxes', action='store_true',
+                         help='Filter the bounding boxes by area')
 
     # Tool output arguments
     outputs = parser.add_argument_group('Outputs')
@@ -60,24 +62,27 @@ def main(args):
     # Get resizing factor using the original bounding boxes
     rf = bboxes.calculate_resizing_factor(args.resizing_factor, args.size)
 
-    # Get sides of the bounding boxes
-    sides = bboxes.get("sides")
+    # Filter the bounding boxes by area if requested
+    if args.filter_bboxes:
+        # Get sides of the bounding boxes
+        sides = bboxes.get("sides")
 
-    # Compute the threshold for the 90th percentile
-    print(f"Computing threshold for the 90th percentile of the bounding boxes' sides")
-    threshold = np.percentile(sides[:,1], 10)
+        # Compute the threshold for the 90th percentile
+        print(f"Computing threshold for the 90th percentile of the bounding boxes' sides")
+        threshold = np.percentile(sides[:,1], 10)
 
-    # Create a boolean mask to filter the array
-    print(f"Filtering bounding boxes with area greater than {threshold}")
-    filtered = bboxes.filter("sides", np.greater_equal, (threshold,threshold))
+        # Create a boolean mask to filter the array
+        print(f"Filtering bounding boxes with area greater than {threshold}")
+        bboxes = bboxes.filter("sides", np.greater_equal, (threshold,threshold))
+
 
     # Expand the bounding boxes
     print(f"Expanding bounding boxes by {args.expansion} pixels")
-    filtered = filtered.expand(args.expansion)
+    bboxes = bboxes.expand(args.expansion)
 
     # Extract nuclei from the filtered array
-    print(f"Extracting {len(filtered)} nuclei from the filtered array")
-    filtered.extract(rf[filtered.idx()], args.size, args.output)
+    print(f"Extracting {len(bboxes)} nuclei from the filtered array")
+    bboxes.extract(rf[bboxes.idx()], args.size, args.output)
 
 
 if __name__ == '__main__':
