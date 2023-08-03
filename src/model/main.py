@@ -42,6 +42,8 @@ def get_args():
                             help="Size of images for training. [Default = (256, 256)]")
     training.add_argument("-b", "--batch_size", dest="batch_size", action="store", default=32, type=int,
                             help="Batch size for training. [Default = 32]")
+    training.add_argument("-sc", "--single_channel", dest="single_channel", action="store_true",
+                            help="Use single channel images. [Default = False]")
 
 
     # Tool output
@@ -66,8 +68,8 @@ def main(args):
 
     # Set transformations
     transform = {
-        "train": get_transforms(training=True),
-        "val": get_transforms(training=False)
+        "train": get_transforms(resize=args.size, single_channel=args.single_channel, training=True),
+        "val":   get_transforms(resize=args.size, single_channel=args.single_channel, training=False)
     }
 
     # Set pathways
