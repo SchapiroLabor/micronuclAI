@@ -27,7 +27,7 @@ preprocess_train = transforms.Compose([
 
 def get_transforms(resize=(256, 256), single_channel=False, training=True):
     # Create list of transformations
-    transfom_list = []
+    transfom_list = list()
 
     # Resize
     transfom_list.append(transforms.Resize(resize))

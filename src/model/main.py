@@ -14,6 +14,8 @@ import pandas as pd
 from dataset import CINDataset
 from models import (EfficientNetClassifier, BinaryClassifierModel)
 from augmentations import get_transforms
+from augmentations import preprocess_test as pt
+from augmentations import preprocess_train as ptr
 from utils import evaluate_binary_model, evaluate_multiclass_model, plot_confusion_matrix
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
@@ -54,6 +56,7 @@ def get_args():
     args.images = Path(args.images).resolve()
     args.labels = Path(args.labels).resolve()
     args.out = Path(args.out).resolve()
+    args.size = tuple(args.size)
 
     return args
 
@@ -61,8 +64,8 @@ def get_args():
 def main(args):
     # Set transformations
     transform = {
-        "train": get_transforms(training=True),
-        "val": get_transforms(training=False)
+        "train": pt,
+        "val": ptr
     }
 
     # Set pathways
