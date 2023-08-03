@@ -171,6 +171,10 @@ if __name__ == "__main__":
     # Read arguments from command line
     args = get_args()
 
+    # Log arguments
+    print(f"Batch size = {args.batch_size}")
+    print(f"Size       = {args.size}")
+
     # Run script and calculate run time
     st = time.time()
     main(args)
