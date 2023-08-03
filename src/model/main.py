@@ -61,8 +61,8 @@ def get_args():
 def main(args):
     # Set transformations
     transform = {
-        "train": get_transforms(resize=args.size,training=True),
-        "val": get_transforms(resize=args.size, training=False)
+        "train": get_transforms(training=True),
+        "val": get_transforms(training=False)
     }
 
     # Set pathways
@@ -173,7 +173,7 @@ if __name__ == "__main__":
 
     # Log arguments
     print(f"Batch size = {args.batch_size}")
-    print(f"Size       = {args.size}")
+    print(f"Image size = {args.size}")
 
     # Run script and calculate run time
     st = time.time()
