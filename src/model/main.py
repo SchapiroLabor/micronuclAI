@@ -13,8 +13,7 @@ import numpy as np
 import pandas as pd
 from dataset import CINDataset
 from models import (EfficientNetClassifier, BinaryClassifierModel)
-from augmentations import preprocess_test as p_t
-from augmentations import preprocess_train as p_tr
+from augmentations import get_transforms
 from utils import evaluate_binary_model, evaluate_multiclass_model, plot_confusion_matrix
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
@@ -35,6 +34,14 @@ def get_args():
     input.add_argument("-l", "--labels", dest="labels", action="store", required=True,
                        help="Pathway to label file.")
 
+    # Training options
+    training = parser.add_argument_group(title="Training")
+    training.add_argument("-s", "--size", dest="size", action="store", default=(256, 256), type=int, nargs="+",
+                            help="Size of images for training. [Default = (256, 256)]")
+    training.add_argument("-b", "--batch_size", dest="batch_size", action="store", default=32, type=int,
+                            help="Batch size for training. [Default = 32]")
+
+
     # Tool output
     output = parser.add_argument_group(title="Output")
     output.add_argument("-o", "--out", dest="out", action="store", required=True,
@@ -52,9 +59,10 @@ def get_args():
 
 
 def main(args):
+    # Set transformations
     transform = {
-        "train": p_tr,
-        "val": p_t
+        "train": get_transforms(resize=args.size,training=True),
+        "val": get_transforms(resize=args.size, training=False)
     }
 
     # Set pathways

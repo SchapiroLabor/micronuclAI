@@ -2,6 +2,7 @@ import torch
 import os
 import pandas as pd
 import PIL
+# from mask2bbox import BBoxes
 
 class CINDataset(torch.utils.data.Dataset):
     def __init__(self, csv_path, images_folder, transform = None):
@@ -19,3 +20,21 @@ class CINDataset(torch.utils.data.Dataset):
         if self.transform is not None:
             image = self.transform(image)
         return image, label
+
+
+# class CINPrediction(torch.utils.data.Dataset):
+#     def __init__(self, image, mask, resizing_factor=0.7, size=(256, 256), transform = None):
+#         self.size = size
+#         self.transform = transform
+#         self.boxes = BBoxes.from_mask(mask)
+#         self.boxes.image = image
+#         self.rf = self.boxes.calculate_resizing_factor(resizing_factor, self.size)
+#
+#     def __len__(self):
+#         return len(self.boxes)
+#
+#     def __getitem__(self, index):
+#         image = self.boxes.extract_single(index, rf=self.rf[index], size=self.size)
+#         if self.transform is not None:
+#             image = self.transform(image)
+#         return image
