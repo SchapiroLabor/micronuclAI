@@ -9,11 +9,35 @@ import torchvision.models as models
 
 
 class EfficientNetClassifier(nn.Module):
-    def __init__(self, model="efficientnet_b0", weights="IMAGENET1K_V1" , out_features=1):
+    def __init__(self, model="efficientnet_b0", weights="IMAGENET1K_V1", out_features=1):
         super().__init__()
 
+        # Load model
         self.model = models.get_model(model, weights=weights)
-        self.model.classifier[1] = nn.Linear(in_features=self.model.last_channel, out_features=out_features)
+
+        # Get the correct last layer depending on the selected model
+        if model == "efficientnet_b0":
+            self.model.classifier[1] = nn.Linear(in_features=1280, out_features=out_features)
+        elif model == "efficientnet_b1":
+            self.model.classifier[1] = nn.Linear(in_features=1280, out_features=out_features)
+        elif model == "efficientnet_b2":
+            self.model.classifier[1] = nn.Linear(in_features=1408, out_features=out_features)
+        elif model == "efficientnet_b3":
+            self.model.classifier[1] = nn.Linear(in_features=1536, out_features=out_features)
+        elif model == "efficientnet_b4":
+            self.model.classifier[1] = nn.Linear(in_features=1792, out_features=out_features)
+        elif model == "efficientnet_b5":
+            self.model.classifier[1] = nn.Linear(in_features=2048, out_features=out_features)
+        elif model == "efficientnet_b6":
+            self.model.classifier[1] = nn.Linear(in_features=2304, out_features=out_features)
+        elif model == "efficientnet_b7":
+            self.model.classifier[1] = nn.Linear(in_features=2560, out_features=out_features)
+        elif model == "efficientnet_v2_s":
+            self.model.classifier[1] = nn.Linear(in_features=1280, out_features=out_features)
+        elif model == "efficientnet_v2_m":
+            self.model.classifier[1] = nn.Linear(in_features=1280, out_features=out_features)
+        elif model == "efficientnet_v2_l":
+            self.model.classifier[1] = nn.Linear(in_features=1280, out_features=out_features)
 
         for param in self.model.parameters():
             param.require_grad = True
@@ -29,7 +53,7 @@ class EfficientNetClassifier(nn.Module):
         return x
 
 
-class BinaryClassifierModel(pl.LightningModule):
+class MulticlassRegression(pl.LightningModule):
 
     def __init__(self, hparams, dataset, model):
         super().__init__()
@@ -78,19 +102,22 @@ class BinaryClassifierModel(pl.LightningModule):
         loss, n_correct = self.general_step(batch, batch_idx, "test")
         return {'test_loss': loss, 'test_n_correct': n_correct}
 
+    def predict_step(self, batch, batch_idx, dataloader_idx=0):
+        return self(batch).squeeze().cpu().numpy()
+
     def validation_end(self, outputs):
         avg_loss, acc = self.general_end(outputs, "val")
         # print("Val-Acc={}".format(acc))
         return {'val_loss': avg_loss, 'val_acc': acc}
 
     def train_dataloader(self):
-        return DataLoader(self.dataset["train"], num_workers=8, batch_size=self.hparams["batch_size"], shuffle=True)
+        return DataLoader(self.dataset["train"], num_workers=16, pin_memory=True, batch_size=self.hparams["batch_size"], shuffle=True)
 
     def val_dataloader(self):
-        return DataLoader(self.dataset["val"], num_workers=8, batch_size=self.hparams["batch_size"])
+        return DataLoader(self.dataset["val"], num_workers=16, pin_memory=True, batch_size=self.hparams["batch_size"])
 
     def test_dataloader(self):
-        return DataLoader(self.dataset["test"], num_workers=8, batch_size=self.hparams["batch_size"])
+        return DataLoader(self.dataset["test"], num_workers=16, pin_memory=True, batch_size=self.hparams["batch_size"])
 
     def configure_optimizers(self):
         optim = torch.optim.Adam(self.model.parameters(), self.hparams["learning_rate"])

@@ -12,7 +12,7 @@ from pytorch_lightning import Trainer
 import numpy as np
 import pandas as pd
 from dataset import CINDataset
-from models import (EfficientNetClassifier, BinaryClassifierModel)
+from models import (EfficientNetClassifier, MulticlassRegression)
 from augmentations import get_transforms
 from augmentations import preprocess_test as pt
 from augmentations import preprocess_train as ptr
@@ -66,7 +66,7 @@ def get_args():
 
 
 def main(args):
-    torch.set_float32_matmul_precision('high')
+    torch.set_float32_matmul_precision('medium')
 
     # Set transformations
     transform = {
@@ -108,11 +108,11 @@ def main(args):
         }
 
         # Set model
-        model = BinaryClassifierModel(hparams, datasets, EfficientNetClassifier(model=args.model))
+        model = MulticlassRegression(hparams, datasets, EfficientNetClassifier(model=args.model))
 
         # Training model
         trainer = pl.Trainer(
-            precision=32,
+            precision="16-mixed",
             accelerator="auto",
             max_epochs=300,
             log_every_n_steps=5,

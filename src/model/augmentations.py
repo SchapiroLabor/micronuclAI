@@ -29,6 +29,9 @@ def get_transforms(resize=(256, 256), single_channel=False, training=True):
     # Create list of transformations
     transfom_list = list()
 
+    # Transform to pil
+    transfom_list.append(transforms.ToPILImage())
+
     # Resize
     transfom_list.append(transforms.Resize(resize))
 

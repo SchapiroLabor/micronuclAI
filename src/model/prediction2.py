@@ -6,14 +6,17 @@ import torch.nn as nn
 import torchvision
 from torch.utils.data import DataLoader
 from torchvision import transforms
+import pytorch_lightning as pl
 from PIL import Image
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
 from augmentations import preprocess_test as preprocess
-from dataset import CINDataset
+from dataset import CINPrediction
+from torch.utils.data import DataLoader
 from models import (EfficientNetClassifier, MulticlassRegression)
+from augmentations import get_transforms
 
 
 def get_args():
@@ -25,12 +28,17 @@ def get_args():
 
     # Tool Input
     input = parser.add_argument_group(title="Input")
-    input.add_argument("-i", "--images", dest="images", action="store", required=True,
-                       help="Pathway to image folder.")
-    input.add_argument("-m", "--model", dest="model", action="store", required=True,
+    input.add_argument("-i", "--image", dest="image", action="store", required=True,
+                       help="Pathway to image.")
+    input.add_argument("-m", "--mask", dest="mask", action="store", required=True,
+                       help="Pathway to mask.")
+    input.add_argument("-mod", "--model", dest="model", action="store", required=True,
                        help="Pathway to prediction model.")
-    input.add_argument("-d", "--device", dest="device", action="store", required=False, default="cpu",
-                       help="Device to be used for training [default='cpu']")
+
+    # Optional input
+    options = parser.add_argument_group(title="Non-required arguments")
+    options.add_argument("-s", "--size", dest="size", action="store", required=False, default=(256, 256),
+                         type=int, nargs="+", help="Size of images for training. [Default = (256, 256)]")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -41,40 +49,14 @@ def get_args():
     args = parser.parse_args()
 
     # Standardize paths
-    args.images = Path(args.images).resolve()
-    args.labels = Path(args.model).resolve()
+    args.image = Path(args.image).resolve()
+    args.mask = Path(args.mask).resolve()
     args.out = Path(args.out).resolve()
 
     return args
 
 
-def main(args):
-    # Get list of file names
-    list_cropped_files = [path.name for path in args.images.iterdir()]
-
-    # Load model and set to evaluation
-    device = args.device
-    print(f"Using device = {device}")
-    net = torch.load(args.model, map_location=device)
-    net.eval()
-
-    # Iterate over files
-    list_predictions = []
-    for image in tqdm(list(args.images.iterdir())):
-        img_pil = Image.open(image)
-        img_tensor = preprocess(img_pil).unsqueeze(0).to(device)
-        y = net(img_tensor).cpu().detach().numpy()
-        list_predictions.append(y[0][0])
-
-    # Create dictionary with results
-    dict_tmp = {
-        "image": list_cropped_files,
-        "score": list_predictions
-    }
-
-    # Create dataframe
-    df_predictions = pd.DataFrame.from_dict(dict_tmp)
-
+def summarize(df_predictions):
     # Get micronuclei counts
     df_predictions["micronuclei"] = df_predictions["score"].apply(lambda x: round(x) if x > 0.5 else 0)
 
@@ -95,12 +77,47 @@ def main(args):
     df_summary["cells_with_micronuclei_ratio"] = cells_with_micronuclei_ratio
     df_summary["micronuclei_ratio"] = micronuclei_ratio
 
+    return df_summary
+
+
+def main(args):
+    torch.set_float32_matmul_precision('medium')
+    # Load model
+    model = torch.load(args.model, map_location="cuda")
+    # model = MulticlassRegression.load_state_dict(state_dict=state_dict)
+
+    # Predicting
+    trainer = pl.Trainer(accelerator="auto")
+
+    # Load data transformations
+    transform = get_transforms(resize=args.size, training=False)
+
+    # Dataset
+    dataset = CINPrediction(args.image, args.mask, resizing_factor=0.7, size=args.size, transform=transform)
+
+    # Dataloader
+    dataloader = DataLoader(dataset, num_workers=8, pin_memory=True, batch_size=64)
+
+    #  Getting predictions
+    predictions = np.concatenate(trainer.predict(model, dataloader), axis=0)
+    ids = np.arange(1, len(predictions)+1)
+
+    # Create dictionary with results
+    dict_tmp = {
+        "image": ids,
+        "score": predictions
+    }
+
+    # Create dataframes for predictions and for the summary
+    df_predictions = pd.DataFrame.from_dict(dict_tmp)
+    df_summary = summarize(df_predictions)
 
     # Save output file
     print("Finished prediction. Saving output file.")
     args.out.mkdir(parents=True, exist_ok=True)
-    df_predictions.to_csv(args.out.joinpath(f"{args.images.name}_predictions.csv"), index=False)
-    df_summary.to_csv(args.out.joinpath(f"{args.images.name}_summary.csv"), index=True)
+    df_predictions.to_csv(args.out.joinpath(f"{args.mask.stem}_predictions.csv"), index=False)
+    df_summary.to_csv(args.out.joinpath(f"{args.mask.stem}_summary.csv"), index=True)
+
 
 
 if __name__ == "__main__":
