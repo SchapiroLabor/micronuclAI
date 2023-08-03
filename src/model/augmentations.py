@@ -55,6 +55,6 @@ def get_transforms(resize=(256, 256), single_channel=False, training=True):
         transfom_list.append(transforms.Normalize(mean=[0.485], std=[0.229]))
 
     # Compose transformations
-    TRANSFORM = transforms.Compose([transfom_list])
+    TRANSFORM = transforms.Compose(transfom_list)
 
     return TRANSFORM

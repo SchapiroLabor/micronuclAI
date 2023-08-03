@@ -62,10 +62,12 @@ def get_args():
 
 
 def main(args):
+    torch.set_float32_matmul_precision('high')
+
     # Set transformations
     transform = {
-        "train": pt,
-        "val": ptr
+        "train": get_transforms(training=True),
+        "val": get_transforms(training=False)
     }
 
     # Set pathways
