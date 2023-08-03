@@ -12,7 +12,7 @@ class EfficientNetClassifier(nn.Module):
     def __init__(self, model="efficientnet_b0", weights="IMAGENET1K_V1" , out_features=1):
         super().__init__()
 
-        self.model = models.get_model(model=model, weights=weights)
+        self.model = models.get_model(model, weights=weights)
         # self.model = models.efficientnet_b0(weights="IMAGENET1K_V1")
         self.model.classifier[1] = nn.Linear(in_features=1280, out_features=out_features)
 
