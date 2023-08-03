@@ -38,6 +38,8 @@ def get_args():
 
     # Training options
     training = parser.add_argument_group(title="Training")
+    training.add_argument("-m", "--model", dest="model", action="store", default="efficientnet_b0",
+                            help="Model to use for training. [Default = efficientnet_b0]")
     training.add_argument("-s", "--size", dest="size", action="store", default=(256, 256), type=int, nargs="+",
                             help="Size of images for training. [Default = (256, 256)]")
     training.add_argument("-b", "--batch_size", dest="batch_size", action="store", default=32, type=int,
@@ -106,7 +108,7 @@ def main(args):
         }
 
         # Set model
-        model = BinaryClassifierModel(hparams, datasets, EfficientNetClassifier())
+        model = BinaryClassifierModel(hparams, datasets, EfficientNetClassifier(model=args.model))
 
         # Training model
         trainer = pl.Trainer(
@@ -179,6 +181,7 @@ if __name__ == "__main__":
     args = get_args()
 
     # Log arguments
+    print(f"Model      = {args.model}")
     print(f"Batch size = {args.batch_size}")
     print(f"Image size = {args.size}")
 
