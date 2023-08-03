@@ -106,7 +106,7 @@ def main(args):
         }
 
         # Set model
-        model = BinaryClassifierModel(hparams, datasets, EfficientNetClassifier(out_features=1))
+        model = BinaryClassifierModel(hparams, datasets, EfficientNetClassifier())
 
         # Training model
         trainer = pl.Trainer(
