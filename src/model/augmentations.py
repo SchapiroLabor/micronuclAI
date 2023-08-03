@@ -50,9 +50,9 @@ def get_transforms(resize=(256, 256), single_channel=False, training=True):
 
     # Normalize
     if single_channel:
-        transfom_list.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
-    else:
         transfom_list.append(transforms.Normalize(mean=[0.485], std=[0.229]))
+    else:
+        transfom_list.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
 
     # Compose transformations
     TRANSFORM = transforms.Compose(transfom_list)
