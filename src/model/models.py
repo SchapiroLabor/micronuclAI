@@ -12,8 +12,8 @@ class EfficientNetClassifier(nn.Module):
     def __init__(self, out_features):
         super().__init__()
 
-        self.model = models.efficientnet_b7(weights="IMAGENET1K_V1")
-        self.model.classifier[1] = nn.Linear(in_features=2560, out_features=out_features)
+        self.model = models.efficientnet_b0(weights="IMAGENET1K_V1")
+        self.model.classifier[1] = nn.Linear(in_features=1280, out_features=out_features)
 
         for param in self.model.parameters():
             param.require_grad = True
