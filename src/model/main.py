@@ -124,7 +124,7 @@ def main(args):
             max_epochs=300,
             log_every_n_steps=5,
             callbacks=[EarlyStopping(monitor="val_loss", mode="min")],
-            csv_logger=csv_logger
+            logger=csv_logger
         )
         trainer.fit(model)
 
