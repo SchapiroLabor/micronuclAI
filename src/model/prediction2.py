@@ -93,7 +93,8 @@ def main(args):
     transform = get_transforms(resize=args.size, training=False)
 
     # Dataset
-    dataset = CINPrediction(args.image, args.mask, resizing_factor=0.7, size=args.size, transform=transform)
+    dataset = CINPrediction(args.image, args.mask, resizing_factor=0.7, size=args.size, transform=transform,
+                            prediction=True)
 
     # Dataloader
     dataloader = DataLoader(dataset, num_workers=8, pin_memory=True, batch_size=64)

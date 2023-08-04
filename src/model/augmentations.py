@@ -25,12 +25,13 @@ preprocess_train = transforms.Compose([
 ])
 
 
-def get_transforms(resize=(256, 256), single_channel=False, training=True):
+def get_transforms(resize=(256, 256), single_channel=False, training=True, prediction=False):
     # Create list of transformations
     transfom_list = list()
 
     # Transform to pil
-    transfom_list.append(transforms.ToPILImage())
+    if prediction:
+        transfom_list.append(transforms.ToPILImage())
 
     # Resize
     transfom_list.append(transforms.Resize(resize))
