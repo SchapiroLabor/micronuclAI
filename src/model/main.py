@@ -16,6 +16,7 @@ from models import (EfficientNetClassifier, MulticlassRegression)
 from augmentations import get_transforms
 from augmentations import preprocess_test as pt
 from augmentations import preprocess_train as ptr
+from pytorch_lightning.loggers import CSVLogger
 from utils import evaluate_binary_model, evaluate_multiclass_model, plot_confusion_matrix
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
@@ -52,6 +53,8 @@ def get_args():
     output = parser.add_argument_group(title="Output")
     output.add_argument("-o", "--out", dest="out", action="store", required=True,
                         help="Pathway to results folder.")
+    output.add_argument("-l", "--log", dest="log", action="store", required=False, default="./",
+                       help="Pathway to log file.")
 
     # Parse arguments
     args = parser.parse_args()
@@ -60,6 +63,7 @@ def get_args():
     args.images = Path(args.images).resolve()
     args.labels = Path(args.labels).resolve()
     args.out = Path(args.out).resolve()
+    args.log = Path(args.log).resolve()
     args.size = tuple(args.size)
 
     return args
@@ -91,6 +95,9 @@ def main(args):
     for k, (train_indices, val_indices) in enumerate(skf.split(data_train.df["image"].loc[train_val_indices],
                                                 data_train.df["label"].loc[train_val_indices])):
 
+        # Set loggers
+        csv_logger = CSVLogger(args.log, name=args.model, version=f"{k}")
+
         # Oversample/undersample training set due to class imbalance
         train_idx = data_train.df.loc[train_indices].groupby("label").sample(n=len(train_indices), replace=True).index
 
@@ -116,7 +123,8 @@ def main(args):
             accelerator="auto",
             max_epochs=300,
             log_every_n_steps=5,
-            callbacks=[EarlyStopping(monitor="val_loss", mode="min")]
+            callbacks=[EarlyStopping(monitor="val_loss", mode="min")],
+            csv_logger=csv_logger
         )
         trainer.fit(model)
 
