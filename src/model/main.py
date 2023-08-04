@@ -53,7 +53,7 @@ def get_args():
     output = parser.add_argument_group(title="Output")
     output.add_argument("-o", "--out", dest="out", action="store", required=True,
                         help="Pathway to results folder.")
-    output.add_argument("-l", "--log", dest="log", action="store", required=False, default="./",
+    output.add_argument("-log", "--log", dest="log", action="store", required=False, default="./",
                        help="Pathway to log file.")
 
     # Parse arguments
