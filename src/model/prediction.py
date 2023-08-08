@@ -1,24 +1,16 @@
 import argparse
 import time
-
 import torch
-import torch.nn as nn
-import torchvision
-from torch.utils.data import DataLoader
-from torchvision import transforms
 from PIL import Image
-import numpy as np
 import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
 from augmentations import preprocess_test as preprocess
-from dataset import CINDataset
-from models import (EfficientNetClassifier, MulticlassRegression)
 
 
 def get_args():
     # Script description
-    description = """Predits the probability of occurence of micronuclei in the cropped images in the input folder."""
+    description = """Predicts the probability of occurrence of micro-nuclei in the cropped images in the input folder."""
 
     # Add parser
     parser = argparse.ArgumentParser(description)

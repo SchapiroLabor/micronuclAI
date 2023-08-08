@@ -39,6 +39,10 @@ def get_args():
     options = parser.add_argument_group(title="Non-required arguments")
     options.add_argument("-s", "--size", dest="size", action="store", required=False, default=(256, 256),
                          type=int, nargs="+", help="Size of images for training. [Default = (256, 256)]")
+    options.add_argument("-rf", "--resizing_factor", dest="resizing_factor", action="store", required=False,
+                         default=0.7, type=float, help="Resizing factor for images. [Default = 0.7]")
+    options.add_argument("-d", "--device", dest="device", action="store", required=False, default="cpu",
+                         help="Device to be used for training [default='cpu']")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -83,18 +87,20 @@ def summarize(df_predictions):
 def main(args):
     torch.set_float32_matmul_precision('medium')
     # Load model
-    model = torch.load(args.model, map_location="cuda")
-    # model = MulticlassRegression.load_state_dict(state_dict=state_dict)
+    model = torch.load(args.model, map_location=args.device)
 
     # Predicting
-    trainer = pl.Trainer(accelerator="auto")
+    trainer = pl.Trainer(accelerator=args.device)
 
     # Load data transformations
-    transform = get_transforms(resize=args.size, training=False)
+    transform = get_transforms(resize=args.size, training=False, prediction=True)
 
     # Dataset
-    dataset = CINPrediction(args.image, args.mask, resizing_factor=0.7, size=args.size, transform=transform,
-                            prediction=True)
+    dataset = CINPrediction(args.image,
+                            args.mask,
+                            resizing_factor=args.resizing_factor,
+                            size=args.size,
+                            transform=transform)
 
     # Dataloader
     dataloader = DataLoader(dataset, num_workers=8, pin_memory=True, batch_size=64)
