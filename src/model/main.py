@@ -70,7 +70,7 @@ def get_args():
 
 
 def main(args):
-    torch.set_float32_matmul_precision('medium')
+    torch.set_float32_matmul_precision('high')
 
     # Set transformations
     transform = {
@@ -87,8 +87,10 @@ def main(args):
     print(f"Dataset contains =  {len(data_train)} images.")
 
     # Train test split
-    train_val_indices, test_indices = train_test_split(data_train.df.index, test_size=0.2,
-                                                       stratify=data_train.df["label"], random_state=42)
+    train_val_indices, test_indices = train_test_split(data_train.df.index,
+                                                       test_size=0.2,
+                                                       stratify=data_train.df["label"],
+                                                       random_state=42)
 
     # Cross validation k-fold
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -119,7 +121,7 @@ def main(args):
 
         # Training model
         trainer = pl.Trainer(
-            precision="16-mixed",
+            precision="bf16-mixed",
             accelerator="auto",
             max_epochs=300,
             log_every_n_steps=5,
