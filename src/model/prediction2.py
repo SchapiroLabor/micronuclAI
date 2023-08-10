@@ -41,6 +41,9 @@ def get_args():
                          type=int, nargs="+", help="Size of images for training. [Default = (256, 256)]")
     options.add_argument("-rf", "--resizing_factor", dest="resizing_factor", action="store", required=False,
                          default=0.7, type=float, help="Resizing factor for images. [Default = 0.7]")
+    options.add_argument("-p", "--precission", dest="precission", action="store", default="32",
+                        choices=["16-mixed", "bf16-mixed", "16-true", "bf16-true", "32", "64"],
+                        help="Precision for training. [Default = bf16-mixed]")
     options.add_argument("-d", "--device", dest="device", action="store", required=False, default="cpu",
                          help="Device to be used for training [default='cpu']")
 
@@ -85,12 +88,13 @@ def summarize(df_predictions):
 
 
 def main(args):
-    torch.set_float32_matmul_precision('medium')
+    torch.set_float32_matmul_precision('high')
     # Load model
     model = torch.load(args.model, map_location=args.device)
 
     # Predicting
-    trainer = pl.Trainer(accelerator=args.device)
+    trainer = pl.Trainer(precision=args.precission,
+                         accelerator=args.device)
 
     # Load data transformations
     transform = get_transforms(resize=args.size, training=False, prediction=True)
