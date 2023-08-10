@@ -45,7 +45,7 @@ def get_args():
                             help="Size of images for training. [Default = (256, 256)]")
     training.add_argument("-b", "--batch_size", dest="batch_size", action="store", default=32, type=int,
                             help="Batch size for training. [Default = 32]")
-    training.add_argument("-p" "--precission", dest="precission", action="store", default="32",
+    training.add_argument("-p" "--precision", dest="precision", action="store", default="32",
                           choices=["16-mixed", "bf16-mixed", "16-true", "bf16-true", "32", "64"],
                           help="Precision for training. [Default = bf16-mixed]")
     training.add_argument("-sc", "--single_channel", dest="single_channel", action="store_true",
@@ -124,7 +124,7 @@ def main(args):
 
         # Training model
         trainer = pl.Trainer(
-            precision="bf16-mixed",
+            precision= args.precision,
             accelerator="auto",
             max_epochs=300,
             log_every_n_steps=5,
