@@ -23,12 +23,13 @@ class CINDataset(torch.utils.data.Dataset):
 
 
 class CINPrediction(torch.utils.data.Dataset):
-    def __init__(self, image, mask, resizing_factor=0.7, size=(256, 256), transform=None):
+    def __init__(self, image, mask, resizing_factor=0.7, expansion=30, size=(256, 256), transform=None):
         self.size = size
         self.transform = transform
         self.boxes = BBoxes.from_mask(mask)
         self.boxes.image = image
         self.rf = self.boxes.calculate_resizing_factor(resizing_factor, self.size)
+        self.boxes  = self.boxes.expand(expansion)
 
     def __len__(self):
         return len(self.boxes)
