@@ -107,7 +107,7 @@ def main(args):
                             transform=transform)
 
     # Dataloader
-    dataloader = DataLoader(dataset, num_workers=8, pin_memory=True, batch_size=1)
+    dataloader = DataLoader(dataset, num_workers=8, pin_memory=True, batch_size=32)
 
     #  Getting predictions
     predictions = np.concatenate(trainer.predict(model, dataloader), axis=0)
