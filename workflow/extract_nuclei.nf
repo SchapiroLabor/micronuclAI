@@ -1,8 +1,8 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 params.input = ""
-params.segmentation = "cellpose_nuclei"
-params.rf = "0.7"
+params.segmentation = ""
+params.rf = "0.6"
 params.e = "10"
 params.s = "256 256"
 params.fb = ""
