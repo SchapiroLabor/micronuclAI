@@ -46,6 +46,10 @@ def get_args():
                         help="Precision for training. [Default = bf16-mixed]")
     options.add_argument("-d", "--device", dest="device", action="store", required=False, default="cpu",
                          help="Device to be used for training [default='cpu']")
+    options.add_argument("-bs", "--batch_size", dest="batch_size", action="store", required=False, default=32,
+                         type=int, help="Batch size for training. [Default = 32]")
+    options.add_argument("-w", "--workers", dest="workers", action="store", required=False, default=8,
+                         type=int, help="Number of workers for training. [Default = 8]")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -107,10 +111,11 @@ def main(args):
                             transform=transform)
 
     # Dataloader
-    dataloader = DataLoader(dataset, num_workers=8, pin_memory=True, batch_size=32)
+    dataloader = DataLoader(dataset, num_workers=args.workers, pin_memory=True, batch_size=args.batch_size)
 
     #  Getting predictions
-    predictions = np.concatenate(trainer.predict(model, dataloader), axis=0)
+    predictions = trainer.predict(model, dataloader)
+    predictions = np.hstack(predictions)
     ids = np.arange(1, len(predictions)+1)
 
     # Create dictionary with results
