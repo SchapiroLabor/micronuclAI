@@ -22,6 +22,7 @@ log.info """\
 	.stripIndent()
 
 process PREDICTION{
+    errorStrategy 'ignore'
 	conda "${conda}/prediction"
 	publishDir "${params.input}/predictions/${params.segmentation}", mode: "move"
 
