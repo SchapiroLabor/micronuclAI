@@ -6,6 +6,7 @@ params.device = "cpu"
 params.segmentation = ""
 params.size = "256 256"
 params.rf = "0.6"
+params.e = "30"
 
 conda = "$HOME/.conda/envs"
 project = "$HOME/cin"
@@ -37,8 +38,9 @@ process PREDICTION{
     script:
     def rf = params.rf ? "-rf  ${params.rf}": ""
     def size = params.size ? "-s ${params.size}" : ""
+    def e = params.e ? "-e ${params.e}" : ""
 	"""
-	python $script -i $image -m $mask -mod $params.model -d $params.device -o . $rf $size
+	python $script -i $image -m $mask -mod $params.model -d $params.device -o . $rf $size $e
 	"""
 
 }

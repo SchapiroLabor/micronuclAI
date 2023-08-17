@@ -40,7 +40,9 @@ def get_args():
     options.add_argument("-s", "--size", dest="size", action="store", required=False, default=(256, 256),
                          type=int, nargs="+", help="Size of images for training. [Default = (256, 256)]")
     options.add_argument("-rf", "--resizing_factor", dest="resizing_factor", action="store", required=False,
-                         default=0.7, type=float, help="Resizing factor for images. [Default = 0.7]")
+                         default=0.6, type=float, help="Resizing factor for images. [Default = 0.6]")
+    options.add_argument("-e", "--expansion", dest="expansion", action="store", required=False, default=25,
+                            type=float, help="Expansion factor for images. [Default = 25]")
     options.add_argument("-p", "--precision", dest="precision", action="store", default="32",
                         choices=["16-mixed", "bf16-mixed", "16-true", "bf16-true", "32", "64"],
                         help="Precision for training. [Default = bf16-mixed]")
@@ -107,6 +109,7 @@ def main(args):
     dataset = CINPrediction(args.image,
                             args.mask,
                             resizing_factor=args.resizing_factor,
+                            expansion=args.expansion,
                             size=args.size,
                             transform=transform)
 
