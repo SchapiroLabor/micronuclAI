@@ -42,7 +42,7 @@ def get_args():
     options.add_argument("-rf", "--resizing_factor", dest="resizing_factor", action="store", required=False,
                          default=0.6, type=float, help="Resizing factor for images. [Default = 0.6]")
     options.add_argument("-e", "--expansion", dest="expansion", action="store", required=False, default=25,
-                            type=float, help="Expansion factor for images. [Default = 25]")
+                         type=int, help="Expansion factor for images. [Default = 25]")
     options.add_argument("-p", "--precision", dest="precision", action="store", default="32",
                         choices=["16-mixed", "bf16-mixed", "16-true", "bf16-true", "32", "64"],
                         help="Precision for training. [Default = bf16-mixed]")
@@ -96,6 +96,8 @@ def summarize(df_predictions):
 def main(args):
     torch.set_float32_matmul_precision('high')
     # Load model
+    print(f"Loading model     = {args.model}")
+    print(f"Using device      = {args.device}")
     model = torch.load(args.model, map_location=args.device)
 
     # Predicting
@@ -106,6 +108,8 @@ def main(args):
     transform = get_transforms(resize=args.size, training=False, prediction=True)
 
     # Dataset
+    print(f"Loading image from = {args.image}")
+    print(f"Loading mask from  = {args.mask}")
     dataset = CINPrediction(args.image,
                             args.mask,
                             resizing_factor=args.resizing_factor,
@@ -114,9 +118,11 @@ def main(args):
                             transform=transform)
 
     # Dataloader
+    print(f"Batch size         = {args.batch_size}")
     dataloader = DataLoader(dataset, num_workers=args.workers, pin_memory=True, batch_size=args.batch_size)
 
     #  Getting predictions
+    print("Predicting.")
     predictions = trainer.predict(model, dataloader)
     predictions = np.hstack(predictions)
     ids = np.arange(1, len(predictions)+1)
