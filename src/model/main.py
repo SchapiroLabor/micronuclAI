@@ -89,9 +89,9 @@ def main(args):
     data_valid = CINDataset(csv_path=args.labels, images_folder=args.images, transform=transform["val"])
     print(f"Dataset contains =  {len(data_train)} images.")
 
-    # Train test split
+    # Split data into train and test (uses 0.1 of data for testing)
     train_val_indices, test_indices = train_test_split(data_train.df.index,
-                                                       test_size=0.2,
+                                                       test_size=0.1,
                                                        stratify=data_train.df["label"],
                                                        random_state=42)
 

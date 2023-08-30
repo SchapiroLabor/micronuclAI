@@ -6,7 +6,7 @@ params.mpp = ""
 params.batch_size = ""
 params.cp_diameter = ""
 
-// Convert to tif
+// Set project and conda environment paths
 params.c = ""
 params.s = ""
 
@@ -98,6 +98,7 @@ process SEGMENTATION_CELLPOSE{
 
 // Process for deepcell segmentation
 process SEGMENTATION_DEEPCELL{
+    errorStrategy 'ignore'
     conda "${conda}/deepcell"
     publishDir "${params.input}/segmentation/${params.segmentation}", mode: "copy"
 
@@ -119,7 +120,7 @@ process SEGMENTATION_DEEPCELL{
 }
 
 process PREDICTION{
-//     errorStrategy 'ignore'
+    errorStrategy 'ignore'
 	conda "${conda}/prediction"
 	publishDir "${params.input}/predictions/${params.segmentation}_${params.rf}_${params.e}", mode: "move"
 

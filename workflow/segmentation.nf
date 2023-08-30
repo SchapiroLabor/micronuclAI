@@ -26,7 +26,6 @@ log.info """\
 
 // Process for stardist segmentation
 process SEGMENTATION_STARDIST{
-    maxForks 1
     conda "${conda}/stardist"
     publishDir "${params.input}/segmentation/stardist", mode: "move"
 
@@ -44,7 +43,6 @@ process SEGMENTATION_STARDIST{
 
 // Process for cellpose segmentation
 process SEGMENTATION_CELLPOSE{
-    maxForks 1
     conda "${conda}/cellpose"
     publishDir "${params.input}/segmentation/${params.segmentation}", mode: "move"
 
@@ -67,7 +65,6 @@ process SEGMENTATION_CELLPOSE{
 
 // Process for deepcell segmentation
 process SEGMENTATION_DEEPCELL{
-    maxForks 1
     conda "${conda}/deepcell"
     publishDir "${params.input}/segmentation/${params.segmentation}", mode: "move"
 
