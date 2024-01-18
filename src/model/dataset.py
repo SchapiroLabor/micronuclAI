@@ -35,7 +35,7 @@ class CINPrediction(torch.utils.data.Dataset):
         return len(self.boxes)
 
     def __getitem__(self, index):
-        image = self.boxes.extract_single(index, resize_factor=self.rf[index], size=self.size)
+        image = self.boxes.grab_pixels_from(index, source="image", resize_factor=self.rf[index], size=self.size, rescale_intensity=True)
         if self.transform is not None:
             image = self.transform(image)
         return image

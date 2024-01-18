@@ -13,7 +13,7 @@ params.s = ""
 params.model = ""
 params.size = "256 256"
 params.rf = "0.6"
-params.e = "30"
+params.e = "25"
 
 
 // Set project and conda environment paths

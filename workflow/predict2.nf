@@ -6,7 +6,7 @@ params.device = "cpu"
 params.segmentation = ""
 params.size = "256 256"
 params.rf = "0.6"
-params.e = "30"
+params.e = "25"
 
 conda = "$HOME/.conda/envs"
 project = "$HOME/cin"
@@ -23,7 +23,7 @@ log.info """\
 	.stripIndent()
 
 process PREDICTION{
-    errorStrategy 'ignore'
+    // errorStrategy 'ignore'
 	conda "${conda}/prediction"
 	publishDir "${params.input}/predictions/${params.segmentation}", mode: "move"
 
