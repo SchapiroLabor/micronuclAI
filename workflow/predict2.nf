@@ -24,7 +24,7 @@ log.info """\
 
 process PREDICTION{
     // errorStrategy 'ignore'
-	conda "${conda}/prediction"
+	conda "${conda}/prediction/${params.segmentation}"
 	publishDir "${params.input}/predictions/${params.segmentation}", mode: "move"
 
     // Define the inputs
