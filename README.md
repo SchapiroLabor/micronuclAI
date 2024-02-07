@@ -1,13 +1,10 @@
 # micronuclAI
-
 Automated assesment of Chromosomal Instability through quantification of micronuclei (MN) and Nuclear Buds (NBUDs).
 
 # Training of the model
 
 ## Raw data
-
-Original raw data used for training and evaluations consists of a collection of 4 different cell lines 
-
+Original raw data used for training and evaluations consists of a collection of 4 different cell lines. 
 | Dataset | Cell line           | # of Images | Objective | Staining |
 |---------|---------------------|-------------|-----------|----------|
 | A375    | Malignant Meelanoma |23           | 10        |DAPI      |
