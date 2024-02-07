@@ -1,32 +1,20 @@
 # micronuclAI
 
-Chromosomal Instability, micronuclei automatic detection.
+Automated assesment of Chromosomal Instability through quantification of micronuclei (MN) and Nuclear Buds (NBUDs).
 
 # Training of the model
 
 ## Raw data
 
-Original raw data consist of 217 20x zoom `.czi` image files belonging to 8 different plates.  
+Original raw data used for training and evaluations consists of a collection of 4 different cell lines 
 
-| Plate           | # of Files |
-|-----------------|------------|
-| A375_dnMCAK-dox | 26         |
-| A375_dnMCAK+dox | 27         |
-| A375_kifa-dox   | 24         |
-| A375_kifa+dox   | 33         |
-| A375_kifc-dox   | 27         |
-| A375_kifc+dox   | 24         |
-| A375-dox        | 26         |
-| A375+dox        | 30         |
-| Total           | 217        |
-
-Each file is contained 3 channels: Cytoskeleton, DAPI and autoflorescence channel.
-
-| Channel Number | Marker         |
-|----------------|----------------|
-| 0              | Cytoskeleton   |
-| 1              | DAPI           |
-| 2              | Autoflouresnce |
+| Dataset | Cell line           | # of Images | Objective | Staining |
+|---------|---------------------|-------------|-----------|----------|
+| A375    | Malignant Meelanoma |23           | 10        |DAPI      |
+| H358    | Human NSCLC         |17           | 10        |DAPI      |
+| Broad   | Human osteosarcoma  |20           | 100       |Hoechst   |
+| KP/KL   | Mouse NSCLC         |12           | 10        |DAPI      |
+| Total   |                     |72           |                      |
 
 ## Pipeline overview
 We perform a series of steps for training the MicronucleAI model.
