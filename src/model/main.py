@@ -56,8 +56,6 @@ def get_args():
     output = parser.add_argument_group(title="Output")
     output.add_argument("-o", "--out", dest="out", action="store", required=True,
                         help="Pathway to results folder.")
-    output.add_argument("-log", "--log", dest="log", action="store", required=False, default="./",
-                       help="Pathway to log file.")
 
     # Parse arguments
     args = parser.parse_args()
@@ -66,7 +64,6 @@ def get_args():
     args.images = Path(args.images).resolve()
     args.labels = Path(args.labels).resolve()
     args.out = Path(args.out).resolve()
-    args.log = Path(args.log).resolve()
     args.size = tuple(args.size)
 
     return args
@@ -96,22 +93,26 @@ def main(args):
                                                        random_state=42)
 
     # Cross validation k-fold
-    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    skf = StratifiedKFold(n_splits=9, shuffle=True, random_state=42)
     for k, (train_indices, val_indices) in enumerate(skf.split(data_train.df["image"].loc[train_val_indices],
                                                 data_train.df["label"].loc[train_val_indices])):
 
         # Set loggers
-        csv_logger = CSVLogger(args.log, name=args.model, version=f"{k}")
+        csv_logger = CSVLogger(args.out, name=f"{args.model}_s{args.size[0]}_bs{args.batch_size}_p{args.precision}", version=f"fold_{k}")
 
         # Oversample/undersample training set due to class imbalance
-        train_idx = data_train.df.loc[train_indices].groupby("label").sample(n=len(train_indices), replace=True).index
+        #train_idx = data_train.df.loc[train_indices].groupby("label").sample(n=len(train_indices), replace=True).index
 
         # Get subsets of data
-        train_set = torch.utils.data.Subset(data_train, train_idx)
+        train_set = torch.utils.data.Subset(data_train, train_indices)
         val_set = torch.utils.data.Subset(data_valid, val_indices)
         test_set = torch.utils.data.Subset(data_valid, test_indices)
         datasets = (train_set, val_set, test_set)
-        print(len(train_set), len(val_set), len(test_set))
+
+        # Print final ammount of training, validation and test data
+        print(f"Training data   = {len(train_set)}")
+        print(f"Validation data = {len(val_set)}")
+        print(f"Test data       = {len(test_set)}")
 
         # set hyper parameters
         hparams = {
@@ -127,7 +128,7 @@ def main(args):
             precision= args.precision,
             accelerator="auto",
             max_epochs=300,
-            log_every_n_steps=5,
+            #log_every_n_steps=1,
             callbacks=[EarlyStopping(monitor="val_loss", mode="min")],
             logger=csv_logger
         )
@@ -153,14 +154,14 @@ def main(args):
 
         # Get test metrics
         df_test_metrics = evaluate_multiclass_model(df_test["prediction"], df_test["target"])
-        df_test_metrics.to_csv(TEST_METRICS, index=False)
+        df_test_metrics.to_csv(TEST_METRICS, index=True)
 
         # Get plot for test data
         fig = plot_confusion_matrix(df_test["prediction"], df_test["target"])
         fig.savefig(TEST_CONFMTRX, dpi=300)
 
         # Save test predictions
-        df_test.to_csv(TEST_PREDICTIONS, index=False)
+        df_test.T.to_csv(TEST_PREDICTIONS, index=False)
 
         ########################################
         # FROM HERE ON VALIDATION
@@ -177,7 +178,7 @@ def main(args):
 
         # Get validation metrics
         df_val_metrics = evaluate_multiclass_model(df_val["prediction"], df_val["target"])
-        df_val_metrics.to_csv(VAL_METRICS, index=False)
+        df_val_metrics.T.to_csv(VAL_METRICS, index=True)
 
         # Get plot for validation data
         fig = plot_confusion_matrix(df_val["prediction"], df_val["target"])
