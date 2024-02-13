@@ -154,7 +154,7 @@ def main(args):
 
         # Get test metrics
         df_test_metrics = evaluate_multiclass_model(df_test["prediction"], df_test["target"])
-        df_test_metrics.to_csv(TEST_METRICS, index=True)
+        df_test_metrics.T.to_csv(TEST_METRICS, index=True)
 
         # Get plot for test data
         fig = plot_confusion_matrix(df_test["prediction"], df_test["target"])
