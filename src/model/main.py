@@ -86,106 +86,119 @@ def main(args):
     data_valid = CINDataset(csv_path=args.labels, images_folder=args.images, transform=transform["val"])
     print(f"Dataset contains =  {len(data_train)} images.")
 
-    # Split data into train and test (uses 0.1 of data for testing)
+    # Split data into train and test (uses 1/10 of data for testing)
     train_val_indices, test_indices = train_test_split(data_train.df.index,
-                                                       test_size=0.1,
+                                                       test_size=1/10,
                                                        stratify=data_train.df["label"],
                                                        random_state=42)
 
+    # Split data into train and validation (uses 1/9 of data for validation)
+    train_indices, val_indices = train_test_split(train_val_indices,
+                                                  test_indices=1/9,
+                                                  stratify=data_train.df["label"].loc[train_val_indices],
+                                                  random_state=42)
+
     # Cross validation k-fold
-    skf = StratifiedKFold(n_splits=9, shuffle=True, random_state=42)
-    for k, (train_indices, val_indices) in enumerate(skf.split(data_train.df["image"].loc[train_val_indices],
-                                                data_train.df["label"].loc[train_val_indices])):
+    # skf = StratifiedKFold(n_splits=9, shuffle=True, random_state=42)
+    # for k, (train_indices, val_indices) in enumerate(skf.split(data_train.df["image"].loc[train_val_indices],
+    #                                             data_train.df["label"].loc[train_val_indices])):
 
         # Set loggers
-        csv_logger = CSVLogger(args.out, name=f"{args.model}_s{args.size[0]}_bs{args.batch_size}_p{args.precision}", version=f"fold_{k}")
+    csv_logger = CSVLogger(args.out, name=f"{args.model}_s{args.size[0]}_bs{args.batch_size}_p{args.precision}", version=f"log")
 
-        # Oversample/undersample training set due to class imbalance
-        #train_idx = data_train.df.loc[train_indices].groupby("label").sample(n=len(train_indices), replace=True).index
+    # Oversample/undersample training set due to class imbalance
+    #train_idx = data_train.df.loc[train_indices].groupby("label").sample(n=len(train_indices), replace=True).index
 
-        # Get subsets of data
-        train_set = torch.utils.data.Subset(data_train, train_indices)
-        val_set = torch.utils.data.Subset(data_valid, val_indices)
-        test_set = torch.utils.data.Subset(data_valid, test_indices)
-        datasets = (train_set, val_set, test_set)
+    # Get subsets of data
+    train_set = torch.utils.data.Subset(data_train, train_indices)
+    val_set = torch.utils.data.Subset(data_valid, val_indices)
+    test_set = torch.utils.data.Subset(data_valid, test_indices)
+    datasets = (train_set, val_set, test_set)
 
-        # Print final ammount of training, validation and test data
-        print(f"Training data   = {len(train_set)}")
-        print(f"Validation data = {len(val_set)}")
-        print(f"Test data       = {len(test_set)}")
+    # Print final ammount of training, validation and test data
+    print(f"Training data   = {len(train_set)}")
+    print(f"Validation data = {len(val_set)}")
+    print(f"Test data       = {len(test_set)}")
 
-        # set hyper parameters
-        hparams = {
-            "batch_size": args.batch_size,
-            "learning_rate": 3e-4,
-        }
+    # set hyper parameters
+    hparams = {
+        "batch_size": args.batch_size,
+        "learning_rate": 3e-4,
+    }
 
-        # Set model
-        model = MulticlassRegression(hparams, datasets, EfficientNetClassifier(model=args.model))
+    # Set model
+    model = MulticlassRegression(hparams, datasets, EfficientNetClassifier(model=args.model))
 
-        # Training model
-        trainer = pl.Trainer(
-            precision= args.precision,
-            accelerator="auto",
-            max_epochs=300,
-            #log_every_n_steps=1,
-            callbacks=[EarlyStopping(monitor="val_loss", mode="min")],
-            logger=csv_logger
-        )
-        trainer.fit(model)
+    # Training model
+    trainer = pl.Trainer(
+        precision= args.precision,
+        accelerator="auto",
+        max_epochs=300,
+        #log_every_n_steps=1,
+        callbacks=[EarlyStopping(monitor="val_loss", mode="min")],
+        logger=csv_logger
+    )
+    trainer.fit(model)
 
-        # Save model
-        MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model_{str(k)}.pt")
-        MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
-        torch.save(model, MODEL_FILE)
+    # Save model
+    # MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model_{str(k)}.pt")
+    MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model.pt")
+    MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(model, MODEL_FILE)
 
-        ########################################
-        # FROM HERE ON TEST
-        # Create test folder if it does not exist
-        RESULTS_FOLDER.joinpath("test").mkdir(parents=True, exist_ok=True)
+    ########################################
+    # FROM HERE ON TEST
+    # Create test folder if it does not exist
+    RESULTS_FOLDER.joinpath("test").mkdir(parents=True, exist_ok=True)
 
-        # Save test results and metrics
-        TEST_METRICS = RESULTS_FOLDER.joinpath(f"test/test_scores_{str(k)}.csv")
-        TEST_CONFMTRX = RESULTS_FOLDER.joinpath(f"test/test_confusion_matrix_{str(k)}.pdf")
-        TEST_PREDICTIONS = RESULTS_FOLDER.joinpath(f"test/test_predictions_{str(k)}.csv")
+    # Save test results and metrics
+    # TEST_METRICS = RESULTS_FOLDER.joinpath(f"test/test_scores_{str(k)}.csv")
+    # TEST_CONFMTRX = RESULTS_FOLDER.joinpath(f"test/test_confusion_matrix_{str(k)}.pdf")
+    # TEST_PREDICTIONS = RESULTS_FOLDER.joinpath(f"test/test_predictions_{str(k)}.csv")
+    TEST_METRICS = RESULTS_FOLDER.joinpath(f"test/test_scores.csv")
+    TEST_CONFMTRX = RESULTS_FOLDER.joinpath(f"test/test_confusion_matrix.pdf")
+    TEST_PREDICTIONS = RESULTS_FOLDER.joinpath(f"test/test_predictions.csv")
 
-        # Get test scores
-        df_test = model.get_test_pred_scores()
+    # Get test scores
+    df_test = model.get_test_pred_scores()
 
-        # Get test metrics
-        df_test_metrics = evaluate_multiclass_model(df_test["prediction"], df_test["target"])
-        df_test_metrics.T.to_csv(TEST_METRICS, index=True)
+    # Get test metrics
+    df_test_metrics = evaluate_multiclass_model(df_test["prediction"], df_test["target"])
+    df_test_metrics.T.to_csv(TEST_METRICS, index=True)
 
-        # Get plot for test data
-        fig = plot_confusion_matrix(df_test["prediction"], df_test["target"])
-        fig.savefig(TEST_CONFMTRX, dpi=300)
+    # Get plot for test data
+    fig = plot_confusion_matrix(df_test["prediction"], df_test["target"])
+    fig.savefig(TEST_CONFMTRX, dpi=300)
 
-        # Save test predictions
-        df_test.T.to_csv(TEST_PREDICTIONS, index=False)
+    # Save test predictions
+    df_test.T.to_csv(TEST_PREDICTIONS, index=False)
 
-        ########################################
-        # FROM HERE ON VALIDATION
-        # Create validation folder if it does not exist
-        RESULTS_FOLDER.joinpath("validation").mkdir(parents=True, exist_ok=True)
+    ########################################
+    # FROM HERE ON VALIDATION
+    # Create validation folder if it does not exist
+    RESULTS_FOLDER.joinpath("validation").mkdir(parents=True, exist_ok=True)
 
-        # Save validation results and metrics
-        VAL_METRICS = RESULTS_FOLDER.joinpath(f"validation/val_scores_{str(k)}.csv")
-        VAL_CONFMTRX = RESULTS_FOLDER.joinpath(f"validation/val_confusion_matrix_{str(k)}.pdf")
-        VAL_PREDICTIONS = RESULTS_FOLDER.joinpath(f"validation/val_predictions_{str(k)}.csv")
+    # Save validation results and metrics
+    # VAL_METRICS = RESULTS_FOLDER.joinpath(f"validation/val_scores_{str(k)}.csv")
+    # VAL_CONFMTRX = RESULTS_FOLDER.joinpath(f"validation/val_confusion_matrix_{str(k)}.pdf")
+    # VAL_PREDICTIONS = RESULTS_FOLDER.joinpath(f"validation/val_predictions_{str(k)}.csv")
+    VAL_METRICS = RESULTS_FOLDER.joinpath(f"validation/val_scores.csv")
+    VAL_CONFMTRX = RESULTS_FOLDER.joinpath(f"validation/val_confusion_matrix.pdf")
+    VAL_PREDICTIONS = RESULTS_FOLDER.joinpath(f"validation/val_predictions.csv")
 
-        # Get validation scores
-        df_val = model.get_val_pred_scores()
+    # Get validation scores
+    df_val = model.get_val_pred_scores()
 
-        # Get validation metrics
-        df_val_metrics = evaluate_multiclass_model(df_val["prediction"], df_val["target"])
-        df_val_metrics.T.to_csv(VAL_METRICS, index=True)
+    # Get validation metrics
+    df_val_metrics = evaluate_multiclass_model(df_val["prediction"], df_val["target"])
+    df_val_metrics.T.to_csv(VAL_METRICS, index=True)
 
-        # Get plot for validation data
-        fig = plot_confusion_matrix(df_val["prediction"], df_val["target"])
-        fig.savefig(VAL_CONFMTRX, dpi=300)
+    # Get plot for validation data
+    fig = plot_confusion_matrix(df_val["prediction"], df_val["target"])
+    fig.savefig(VAL_CONFMTRX, dpi=300)
 
-        # Save validation predictions
-        df_val.to_csv(VAL_PREDICTIONS, index=False)
+    # Save validation predictions
+    df_val.to_csv(VAL_PREDICTIONS, index=False)
 
 
 
