@@ -25,7 +25,7 @@ def plot_confusion_matrix(scores, labels):
 
     # Create canvas and plot h confusion amtrix
     fig, ax = plt.subplots(1, 1, figsize=(9, 9))
-    sns.heatmap(cm, annot=True, fmt=".0f", cmap="crest", cbar=False, ax=ax)
+    sns.heatmap(cm, annot=True, fmt=".0f", cmap="crest", cbar=False, ax=ax, palette="Blues_r")
     ax.set_xlabel("Target")
     ax.set_ylabel("Prediction")
     ax.set_title("Confusion Matrix")
