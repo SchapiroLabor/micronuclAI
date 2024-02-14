@@ -1,21 +1,11 @@
-import pickle
 import torch
 import time
 from pathlib import Path
-import torch.nn as nn
-import torchvision
 from torch.utils.data import DataLoader
-from torchvision import transforms
-import PIL
 import pytorch_lightning as pl
-from pytorch_lightning import Trainer
-import numpy as np
-import pandas as pd
 from dataset import CINDataset
 from models import (EfficientNetClassifier, MulticlassRegression)
 from augmentations import get_transforms
-from augmentations import preprocess_test as pt
-from augmentations import preprocess_train as ptr
 from pytorch_lightning.loggers import CSVLogger
 from utils import evaluate_binary_model, evaluate_multiclass_model, plot_confusion_matrix
 from sklearn.model_selection import train_test_split, StratifiedKFold
@@ -98,16 +88,8 @@ def main(args):
                                                   stratify=data_train.df["label"].loc[train_val_indices],
                                                   random_state=42)
 
-    # Cross validation k-fold
-    # skf = StratifiedKFold(n_splits=9, shuffle=True, random_state=42)
-    # for k, (train_indices, val_indices) in enumerate(skf.split(data_train.df["image"].loc[train_val_indices],
-    #                                             data_train.df["label"].loc[train_val_indices])):
-
-        # Set loggers
+    # Set loggers
     csv_logger = CSVLogger(args.out, name=f"{args.model}_s{args.size[0]}_bs{args.batch_size}_p{args.precision}", version=f"log")
-
-    # Oversample/undersample training set due to class imbalance
-    #train_idx = data_train.df.loc[train_indices].groupby("label").sample(n=len(train_indices), replace=True).index
 
     # Get subsets of data
     train_set = torch.utils.data.Subset(data_train, train_indices)
@@ -152,9 +134,6 @@ def main(args):
     RESULTS_FOLDER.joinpath("test").mkdir(parents=True, exist_ok=True)
 
     # Save test results and metrics
-    # TEST_METRICS = RESULTS_FOLDER.joinpath(f"test/test_scores_{str(k)}.csv")
-    # TEST_CONFMTRX = RESULTS_FOLDER.joinpath(f"test/test_confusion_matrix_{str(k)}.pdf")
-    # TEST_PREDICTIONS = RESULTS_FOLDER.joinpath(f"test/test_predictions_{str(k)}.csv")
     TEST_METRICS = RESULTS_FOLDER.joinpath(f"test/test_scores.csv")
     TEST_CONFMTRX = RESULTS_FOLDER.joinpath(f"test/test_confusion_matrix.pdf")
     TEST_PREDICTIONS = RESULTS_FOLDER.joinpath(f"test/test_predictions.csv")
@@ -179,9 +158,6 @@ def main(args):
     RESULTS_FOLDER.joinpath("validation").mkdir(parents=True, exist_ok=True)
 
     # Save validation results and metrics
-    # VAL_METRICS = RESULTS_FOLDER.joinpath(f"validation/val_scores_{str(k)}.csv")
-    # VAL_CONFMTRX = RESULTS_FOLDER.joinpath(f"validation/val_confusion_matrix_{str(k)}.pdf")
-    # VAL_PREDICTIONS = RESULTS_FOLDER.joinpath(f"validation/val_predictions_{str(k)}.csv")
     VAL_METRICS = RESULTS_FOLDER.joinpath(f"validation/val_scores.csv")
     VAL_CONFMTRX = RESULTS_FOLDER.joinpath(f"validation/val_confusion_matrix.pdf")
     VAL_PREDICTIONS = RESULTS_FOLDER.joinpath(f"validation/val_predictions.csv")
@@ -199,8 +175,6 @@ def main(args):
 
     # Save validation predictions
     df_val.to_csv(VAL_PREDICTIONS, index=False)
-
-
 
 
 if __name__ == "__main__":
