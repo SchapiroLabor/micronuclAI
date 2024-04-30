@@ -21,17 +21,18 @@ process CONVERTCZI2TIF{
 	publishDir "${params.input}/ometif", mode: "move"
 	
 	input:
-	path (czi_file)
+	path (input_file)
 
 	output:
 	path '*.ome.tif'
 
 	script:
+	def output = input_file.baseName + ".ome.tif"
     def s = "${params.s}" ? "-s ${params.s}" : ""
     def c = "${params.c}" ? "-c ${params.c}" : ""
 
 	"""
-	python $script -i $czi_file -o . $s $c
+	python $script -i $input_file -o $output $s $c
 	
 	"""
 }

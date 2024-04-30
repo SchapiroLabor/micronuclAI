@@ -42,24 +42,24 @@ def get_args():
 def main(args):
     # Read .czi image
     img = AICSImage(args.image)
-    print(f"Image shape = {img.shape}")
+    print(f"Image shape      = {img.shape}")
     print(f"Image dimensions = {img.dims}")
 
     # Deal with channels
     if args.channel is not None:
         img = img.get_image_data("YX", C=args.channel)
-        print(f"Image shape = {img.shape}")
+        print(f"Image shape      = {img.shape}")
         img = AICSImage(img)
 
     if args.series is not None:
         img = img.get_image_data("YX", S=args.series)
-        print(f"Image shape = {img.shape}")
+        print(f"Image shape      = {img.shape}")
         img = AICSImage(img)
 
     # Save .ome.tif image
-    print("Saving .ome.tif image...")
-    args.output.mkdir(parents=True, exist_ok=True)
-    img.save(args.output.joinpath(f"{args.image.stem}.ome.tif"))
+    print("Saving output image")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    img.save(args.output)
 
 
 if __name__ == '__main__':
