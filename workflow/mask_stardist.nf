@@ -19,18 +19,16 @@ process SEGMENTATION_STARDIST{
 	publishDir "${params.input}/segmentation/stardist", mode: "move"
 
 	input:
-	path (nuclear_image), stageAs: "input.ome.tif"
+	path (nuclear_image)
 
 	output:
 	path '*.tif'
 
 	script:
-// 	def model = "${params.segmentation}" ? "-m ${params.segmentation}" : ""
-// 	def batch_size = "${params.batch_size}" ? "-bs ${params.batch_size}" : ""
-// 	def mpp = "${params.mpp}" ? "-mpp ${params.mpp}" : ""
+    def output = nuclear_image.baseName + "_mask.tif"
 
 	"""
-	python $script_stardist -i input.ome.tif -o .
+	python $script_stardist -i input.ome.tif -o $output
 	"""
 }
 

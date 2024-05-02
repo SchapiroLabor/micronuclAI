@@ -23,18 +23,19 @@ process CELLPOSE_SEGMENTATION{
 	publishDir "${params.input}/segmentation/cellpose_${params.segmentation}", mode: "move"
 	
 	input:
-	path (nuclear_image), stageAs: "input.ome.tif"
+	path (nuclear_image)
 
 	output:
-	path '*.tif'
+	path '*_mask.tif'
 
 	script:
+	def output = nuclear_image.baseName + "_mask.tif"
 	def segmentation = "${params.segmentation}" ? "-m ${params.segmentation}" : ""
 	def batch_size = "${params.batch_size}" ? "-bs ${params.batch_size}" : ""
 	def cp_diameter = "${params.cp_diameter}" ? "-dm ${params.cp_diameter}" : ""
 
 	"""
-	python $script -i input.ome.tif -o . -d $params.device $segmentation $cp_diameter $batch_size
+	python $script -i input.ome.tif -o $output -d $params.device $segmentation $cp_diameter $batch_size
 	"""
 }
 

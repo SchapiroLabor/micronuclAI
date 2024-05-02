@@ -19,8 +19,15 @@ def get_args():
 
     # Tool Input
     input = parser.add_argument_group(title = "Input")
-    input.add_argument("-i", "--image", dest="image", action="store", required=True,
+    input.add_argument("-i", "--image", dest="image",
+                       action="store", required=True,
                        help="Pathway to input image.")
+    input.add_argument("-m", "--model", dest="model",
+                       action="store", required=False, default="2D_versatile_fluo",
+                       help="Model to be used for segmentation [default='2D_versatile_fluo'].")
+    parser.add_argument("-pnorm", "--pnorm", dest="pnorm",
+                        type=float, nargs=2, default=[1, 99.8],
+                        help="pmin/pmax to use for normalization")
 
     # Tool output
     output = parser.add_argument_group(title = "Output")
@@ -39,26 +46,30 @@ def get_args():
 
 def main(args):
     # Load model
-    print(f"Loading Model")
-    model = StarDist2D.from_pretrained('2D_versatile_fluo')
+    print(f"Loading Model      = {args.model}")
+    model = StarDist2D.from_pretrained(args.model)
 
     # Read in data, it most be contained in a list object for evaluation
     print(f"Reading image")
     img = imread(args.image)
-    print(f"Image has shape: {img.shape}")
+    print(f"Image has shape    = {img.shape}")
 
-    # Predict nuclei in image
+    # Normalize image
+    img = normalize(img, *args.pnorm)
+
+    # Predict nuclei
     print("Predicting")
-    labels, _ = model.predict_instances(normalize(img))
-    print(f"Mask shape = {labels.shape}")
+    labels, _ = model.predict_instances(img)
+    print(f"Mask shape         = {labels.shape}")
     print(f"Mask unique values = {len(set(labels.flatten()))}")
-    print(f"Mask data type = {labels.dtype}")
+    print(f"Mask data type     = {labels.dtype}")
 
     # Create output folder if it does not exist
-    Path(args.out).mkdir(parents=True, exist_ok=True)
-    print(f"Saving mask to {args.out}")
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    print(f"Saving mask to     = {args.out}")
+
     # Save mask file in tif format
-    imsave(args.out.joinpath(f"{args.image.name.split('.')[0]}.tif"), labels)
+    imsave(args.out, labels)
 
 
 if __name__ == "__main__":

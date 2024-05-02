@@ -19,22 +19,27 @@ def get_args():
 
     # Tool Input
     input = parser.add_argument_group(title="Input")
-    input.add_argument("-i", "--image", dest="image", action="store", required=True,
+    input.add_argument("-i", "--image", dest="image",
+                       action="store", required=True,
                        help="Pathway to input image.")
-    input.add_argument("-m", "--model", dest="model", action="store", required=False, default="nuclear",
+    input.add_argument("-m", "--model", dest="model",
+                       action="store", required=False, default="nuclear",
                        choices=["nuclear", "mesmer_nuclear", "mesmer_whole-cell"],
                        help="Model to be used for segmentation [default='nuclear'].")
 
     optional = parser.add_argument_group(title="Deepcell arguments")
-    optional.add_argument("-mpp", "--mpp", dest="mpp", action="store", required=False, default=0.65, type=float,
+    optional.add_argument("-mpp", "--mpp", dest="mpp",
+                          action="store", required=False, default=0.65, type=float,
                           help="Microns per pixel of the image [default=0.65].")
-    optional.add_argument("-bs", "--batch-size", dest="batch_size", action="store", required=False, default=4,
+    optional.add_argument("-bs", "--batch-size", dest="batch_size",
+                          action="store", required=False, default=4,
                           type=int, help="Batch size [default=4]")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
-    output.add_argument("-o", "--out", dest="out", action="store", required=True,
-                        help="Path to the output data folder.")
+    output.add_argument("-o", "--out", dest="out",
+                        action="store", required=True,
+                        help="Path to the output data file.")
 
     # Parse arguments
     args = parser.parse_args()
@@ -83,8 +88,8 @@ def main(args):
     print(f"Mask with shape       = {mask.shape}")
     print(f"Predicted masks       = {mask.max()}")
     print(f"Saving mask to        = {args.out}")
-    args.out.mkdir(parents=True, exist_ok=True)
-    imsave(args.out.joinpath(f"{args.image.name.split('.')[0]}.tif"), mask)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    imsave(args.out, mask)
 
 
 if __name__ == "__main__":

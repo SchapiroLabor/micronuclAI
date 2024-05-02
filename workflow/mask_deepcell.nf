@@ -22,18 +22,19 @@ process SEGMENTATION_DEEPCELL{
 	publishDir "${params.input}/segmentation/deepcell_${params.segmentation}", mode: "move"
 
 	input:
-	path (nuclear_image), stageAs: "input.ome.tif"
+	path (nuclear_image)
 
 	output:
 	path '*.tif'
 
 	script:
+	def output = nuclear_image.baseName + "_mask.tif"
 	def model = "${params.segmentation}" ? "-m ${params.segmentation}" : ""
 	def batch_size = "${params.batch_size}" ? "-bs ${params.batch_size}" : ""
 	def mpp = "${params.mpp}" ? "-mpp ${params.mpp}" : ""
 
 	"""
-	python $script_deepcell -i input.ome.tif -o . -mpp $params.mpp $model $batch_size
+	python $script_deepcell -i input.ome.tif -o $output -mpp $params.mpp $model $batch_size
 	"""
 }
 
