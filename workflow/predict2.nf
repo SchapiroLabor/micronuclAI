@@ -52,7 +52,7 @@ workflow {
     input_ch = Channel.fromPath("${params.input}/segmentation/${params.segmentation}/*.tif")
     .map{ m ->
       def base = m.baseName
-      [mask:m,  image:file("${params.input}/ometif/${base}.ome.tif")]
+      [mask:m,  image:file("${params.input}/ometif/${base}.tif")]
     }
     PREDICTION(input_ch)
 }
