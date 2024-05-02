@@ -19,13 +19,16 @@ log.info """\
 	 model pathway = ${params.model}
 	 device        = ${params.device}
 	 segmentation  = ${params.segmentation}
+	 single size   = ${params.size}
+	 rf            = ${params.rf}
+	 expansion     = ${params.e}
 	"""
 	.stripIndent()
 
 process PREDICTION{
     // errorStrategy 'ignore'
-	conda "${conda}/prediction/${params.segmentation}"
-	publishDir "${params.input}/predictions/${params.segmentation}", mode: "move"
+	conda "${conda}/prediction"
+	publishDir "${params.input}/predictions/${params.segmentation}_${params.size}_${params.rf}_${params.e}", mode: "move"
 
     // Define the inputs
     input:
@@ -40,7 +43,7 @@ process PREDICTION{
     def size = params.size ? "-s ${params.size}" : ""
     def e = params.e ? "-e ${params.e}" : ""
 	"""
-	python $script -i $image -m $mask -mod $params.model -d $params.device -o . $rf $size $e
+	python $script -i $image -m $mask -mod $params.model -d $params.device -o . $rf $size $e -w 0
 	"""
 
 }
