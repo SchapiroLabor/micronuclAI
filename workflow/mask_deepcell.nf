@@ -34,7 +34,7 @@ process SEGMENTATION_DEEPCELL{
 	def mpp = "${params.mpp}" ? "-mpp ${params.mpp}" : ""
 
 	"""
-	python $script_deepcell -i input.ome.tif -o $output -mpp $params.mpp $model $batch_size
+	python $script_deepcell -i $nuclear_image -o $output -mpp $params.mpp $model $batch_size
 	"""
 }
 

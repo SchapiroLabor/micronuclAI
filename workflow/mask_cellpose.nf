@@ -35,7 +35,7 @@ process CELLPOSE_SEGMENTATION{
 	def cp_diameter = "${params.cp_diameter}" ? "-dm ${params.cp_diameter}" : ""
 
 	"""
-	python $script -i input.ome.tif -o $output -d $params.device $segmentation $cp_diameter $batch_size
+	python $script -i $nuclear_image -o $output -d $params.device $segmentation $cp_diameter $batch_size
 	"""
 }
 

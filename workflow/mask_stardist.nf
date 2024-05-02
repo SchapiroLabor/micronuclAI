@@ -28,7 +28,7 @@ process SEGMENTATION_STARDIST{
     def output = nuclear_image.baseName + "_mask.tif"
 
 	"""
-	python $script_stardist -i input.ome.tif -o $output
+	python $script_stardist -i $nuclear_image -o $output
 	"""
 }
 
