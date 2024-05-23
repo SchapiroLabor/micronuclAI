@@ -57,7 +57,7 @@ def get_CAM(feature_conv, weight_sigmoid):
 
 def main(args):
     # Load model
-    net = torch.load(args.model)
+    net = torch.load(args.model, map_location="cpu")
     net.eval()
 
     # hook the feature extractor

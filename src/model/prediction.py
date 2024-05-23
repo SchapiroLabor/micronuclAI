@@ -1,24 +1,16 @@
 import argparse
 import time
-
 import torch
-import torch.nn as nn
-import torchvision
-from torch.utils.data import DataLoader
-from torchvision import transforms
 from PIL import Image
-import numpy as np
 import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
-
-from dataset import CINDataset
-from models import (EfficientNetClassifier, BinaryClassifierModel)
+from augmentations import preprocess_test as preprocess
 
 
 def get_args():
     # Script description
-    description = """Predits the probability of occurence of micronuclei in the cropped images in the input folder."""
+    description = """Predicts the probability of occurrence of micro-nuclei in the cropped images in the input folder."""
 
     # Add parser
     parser = argparse.ArgumentParser(description)
@@ -52,21 +44,10 @@ def main(args):
     # Get list of file names
     list_cropped_files = [path.name for path in args.images.iterdir()]
 
-    # Prediction preprocess
-    preprocess = transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.Grayscale(num_output_channels=3),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
-        )
-    ])
-
     # Load model and set to evaluation
     device = args.device
     print(f"Using device = {device}")
-    net = torch.load(args.model, map_location=device)#.to(device)
+    net = torch.load(args.model, map_location=device)
     net.eval()
 
     # Iterate over files
@@ -80,13 +61,38 @@ def main(args):
     # Create dictionary with results
     dict_tmp = {
         "image": list_cropped_files,
-        "prediction": list_predictions
+        "score": list_predictions
     }
 
-    # Save output file
+    # Create dataframe
     df_predictions = pd.DataFrame.from_dict(dict_tmp)
+
+    # Get micronuclei counts
+    df_predictions["micronuclei"] = df_predictions["score"].apply(lambda x: round(x) if x > 0.5 else 0)
+
+    # Get dataset summary
+    print("Calculating summary.")
+    df_summary = df_predictions["micronuclei"].value_counts()
+
+    total = df_summary.sum()
+    total_micronuclei = sum(df_summary.index * df_summary.values)
+    cells_with_micronuclei = df_summary[df_summary.index > 0].sum()
+    cells_with_micronuclei_ratio = cells_with_micronuclei / total
+    micronuclei_ratio = total_micronuclei / total
+
+    # Add summary to dataframe
+    df_summary["total_cells"] = total
+    df_summary["total_micronuclei"] = total_micronuclei
+    df_summary["cells_with_micronuclei"] = cells_with_micronuclei
+    df_summary["cells_with_micronuclei_ratio"] = cells_with_micronuclei_ratio
+    df_summary["micronuclei_ratio"] = micronuclei_ratio
+
+
+    # Save output file
+    print("Finished prediction. Saving output file.")
     args.out.mkdir(parents=True, exist_ok=True)
     df_predictions.to_csv(args.out.joinpath(f"{args.images.name}_predictions.csv"), index=False)
+    df_summary.to_csv(args.out.joinpath(f"{args.images.name}_summary.csv"), index=True)
 
 
 if __name__ == "__main__":
