@@ -6,6 +6,11 @@ params.mpp = ""
 params.batch_size = ""
 params.cp_diameter = ""
 
+// Posible options for segmentation 
+// --segmentation stardist
+// --segmentation cellpose_nuclei
+// --segmentation deepcell_nuclear 
+
 // Set project and conda environment paths
 conda = "$HOME/.conda/envs"
 project = "$HOME/cin"
