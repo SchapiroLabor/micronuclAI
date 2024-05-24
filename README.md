@@ -1,6 +1,5 @@
 
-<img align="right" width="80" height="80" src= "images/streamlit_app.png">
-
+<img align="right" width="200" height="60" src= "images/logo_name.png">
 
 # micronuclAI
 **Automated assessment of Chromosomal Instability through quantification of micronuclei (MN) and Nuclear Buds (NBUDs).**
@@ -16,6 +15,8 @@ micronuclAI is an automated pipeline for reliable quantification of micronuclei 
 A Quick implementation is available through 
 [StreamLit](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2).
 
+// TODO: Update the streamlit link once registered with the domain.
+
 ![screenshot](images/streamlit_app.png)
 
 Inference of micronuclei can be achieved in small to medium sized example images that can be uploaded to the streamlit app. Image data is processed within a virtual machine (VM) on Heicloud, a local Cloud infrastructure provided by University Computing Center Heidelberg, and images are immediately deleted after micronuclei inference. Once micronuclei are inferred, results predictions as well as several plots describing the results are generated and presented to the user within the streamlit app which can also be downloaded as csv files. 
@@ -23,6 +24,7 @@ Inference of micronuclei can be achieved in small to medium sized example images
 ### Local Installation 
 
 ### Prerequisites
+
 
 Two input files are required for micronuclAI
 1. Nuclei-stained Image 
@@ -32,6 +34,12 @@ Two input files are required for micronuclAI
 
 A step by step series of examples that tell you how to get a development
 environment running locally
+
+Please ensure you have Python>=3.10 installed with 
+
+```
+python -version
+```
 
 Pull the repo into your local device
 
@@ -48,7 +56,13 @@ Install the required libraries
 To use micronuclAI on your own images:
 
 ```
-python src/model/prediction2.py - i <path/to/image> -m <path/to/mask> - mod <path/to/model> - o <path/to/output/folder>
+python src/model/prediction2.py -i <path/to/image> -m <path/to/mask> -mod <path/to/model> - o<path/to/output/folder>
+```
+
+To run the test 
+
+```
+python src/model/prediction2.py -i /test/micronuclAI.nuclear_image.test.tiff -m /test/micronuclAI.nuclear_mask.test.tiff -mod /model/model_7.pt -o /test/output
 ```
 
 ### Parameters and Arguments
@@ -68,7 +82,11 @@ python src/model/prediction2.py - i <path/to/image> -m <path/to/mask> - mod <pat
 
 
 ## Tutorial 
-- [ ] IN PROGRESS
+- [ ] TODO: A Jupiter notebook tutorial 
+- [ ] TODO: Add a minimal test dataset
+- [ ] TODO: Provide the default model 
+
+A test dataset has been provided in the data folder with an image and it's associated mask. 
 
 ## Contributing
 
