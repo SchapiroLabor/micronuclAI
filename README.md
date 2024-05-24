@@ -59,7 +59,7 @@ To use micronuclAI on your own images:
 python src/model/prediction2.py -i <path/to/image> -m <path/to/mask> -mod <path/to/model> - o<path/to/output/folder>
 ```
 
-To run the test 
+To run the test, please first download the test dataset from the [StreamLit link](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
 
 ```
 python src/model/prediction2.py -i /test/micronuclAI.nuclear_image.test.tiff -m /test/micronuclAI.nuclear_mask.test.tiff -mod /model/model_7.pt -o /test/output
