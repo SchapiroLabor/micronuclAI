@@ -40,17 +40,18 @@ environment running locally
 
 Please ensure you have Python>=3.10 installed with 
 
-```
+``` bash
 python -version
 ```
 
 Pull the repo into your local device
 
-```cmd
-git pull https://github.com/SchapiroLabor/micronuclAI.git
+```bash
+git clone https://github.com/SchapiroLabor/micronuclAI
 ```
 Install the required libraries
- ```
+
+ ``` bash
  pip install -r requirements.txt
  ```
 
