@@ -65,7 +65,7 @@ python src/model/prediction2.py -i <path/to/image> -m <path/to/mask> -mod <path/
 A test dataset has been provided in the [test_data](test) folder with a [mask](test/test_mask.tiff) and its corresponding [image](test/test_image.tiff) file.
 
 ```
-python src/model/prediction2.py -i /test/test_image.tiff -m /test/test_mask.tiff -mod /micronuclAI_model/micronuclai.pt -o /test/output
+python src/model/prediction2.py -i ./test/test_image.tiff -m ./test/test_mask.tiff -mod ./micronuclAI_model/micronuclai.pt -o ./test/output
 ```
 
 ### Parameters and Arguments
