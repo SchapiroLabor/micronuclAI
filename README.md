@@ -86,6 +86,5 @@ python src/model/prediction2.py -i /test/test_image.tiff -m /test/test_mask.tiff
 
 ## License
 
-micronuclAI offers a dual licensing mode the [GNU Affero General Public License v3.0](LICENSE) - see the [LICENSE](LICENSE) file and [ESSENTIAL_LICENSE_CONDITIONS.txt](ESSENTIAL_LICENSE_CONDITIONS.txt) for
-details
+micronuclAI offers a dual licensing mode the [GNU Affero General Public License v3.0](LICENSE) - see [LICENSE](LICENSE) and [ESSENTIAL_LICENSE_CONDITIONS.txt](ESSENTIAL_LICENSE_CONDITIONS.txt)
 
