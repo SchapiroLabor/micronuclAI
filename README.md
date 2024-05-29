@@ -13,7 +13,7 @@ micronuclAI is an automated pipeline for reliable quantification of micronuclei 
 ### Stream-lit App
 
 A Quick implementation is available through 
-[StreamLit](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2).
+[StreamLit](http://129.206.6.173:8080/app/cin_streamlit?sp_hide_navbar=true).
 
 // TODO: Update the streamlit link once registered with the domain.
 
