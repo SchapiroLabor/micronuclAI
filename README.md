@@ -15,7 +15,10 @@ micronuclAI is an automated pipeline for reliable quantification of micronuclei 
 A Quick implementation is available through 
 [StreamLit](http://129.206.6.173:8080/app/cin_streamlit?sp_hide_navbar=true).
 
-// TODO: Update the streamlit link once registered with the domain.
+```
+name: reviewer
+password: micronuclAI_review
+```
 
 ![screenshot](images/streamlit_app.png)
 
