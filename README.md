@@ -84,9 +84,6 @@ python src/model/prediction2.py -i /test/test_image.tiff -m /test/test_mask.tiff
 | `--workers`        | `-w`       | No       | 0          | Int          | Number of workers for training/testing.                                                           |
 
 
-## Tutorial 
-- [ ] TODO: A Jupiter notebook tutorial
-
 ## License
 
 micronuclAI offers a dual licensing mode the [GNU Affero General Public License v3.0](LICENSE) - see the [LICENSE](LICENSE) file and [ESSENTIAL_LICENSE_CONDITIONS.txt](ESSENTIAL_LICENSE_CONDITIONS.txt) for
