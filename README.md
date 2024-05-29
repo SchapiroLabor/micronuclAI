@@ -28,7 +28,7 @@ Inference of micronuclei can be achieved in small to medium sized example images
 
 Two input files are required for micronuclAI
 1. Nuclei-stained Image 
-2. Assosiated Mask 
+2. Associated Mask 
 
 ### Local Installation
 
@@ -56,37 +56,33 @@ Install the required libraries
 To use micronuclAI on your own images:
 
 ```
-python src/model/prediction2.py -i <path/to/image> -m <path/to/mask> -mod <path/to/model> - o<path/to/output/folder>
+python src/model/prediction2.py -i <path/to/image> -m <path/to/mask> -mod <path/to/model> -o <path/to/output/folder>
 ```
 
-To run the test, please first download the test dataset from the [StreamLit link](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
+A test dataset has been provided in the [test_data](test) folder with a [mask](test/test_mask.tiff) and its corresponding [image](test/test_image.tiff) file.
 
 ```
-python src/model/prediction2.py -i /test/micronuclAI.nuclear_image.test.tiff -m /test/micronuclAI.nuclear_mask.test.tiff -mod /model/model_7.pt -o /test/output
+python src/model/prediction2.py -i /test/test_image.tiff -m /test/test_mask.tiff -mod /micronuclAI_model/micronuclai.pt -o /test/output
 ```
 
 ### Parameters and Arguments
-| Parameter          | Short Form | Required | Default         | Type         | Description                                                                 |
-|--------------------|------------|----------|-----------------|--------------|-----------------------------------------------------------------------------|
-| `--image`          | `-i`       | Yes      | N/A             | String       | Pathway to image.                                                           |
-| `--mask`           | `-m`       | Yes      | N/A             | String       | Pathway to mask.                                                            |
-| `--model`          | `-mod`     | Yes      | N/A             | String       | Pathway to prediction model.                                                |
-| `--out`            | `-o`       | Yes      | N/A             | String       | Path to the output data folder.                                             |
-| `--size`           | `-s`       | No       | (256, 256)      | List of int  | Size of images for training.                                                |
-| `--resizing_factor`| `-rf`      | No       | 0.6             | Float        | Resizing factor for images.                                                 |
-| `--expansion`      | `-e`       | No       | 25              | Int          | Expansion factor for images.                                                |
-| `--precision`      | `-p`       | No       | 32              | String       | Precision for training. Options: `["16-mixed", "bf16-mixed", "16-true", "bf16-true", "32", "64"]` |
-| `--device`         | `-d`       | No       | "cpu"           | String       | Device to be used for training.                                             |
-| `--batch_size`     | `-bs`      | No       | 32              | Int          | Batch size for training.                                                    |
-| `--workers`        | `-w`       | No       | 8               | Int          | Number of workers for training.                                             |
+| Parameter          | Short Form | Required | Default    | Type         | Description                                                                                       |
+|--------------------|------------|----------|------------|--------------|---------------------------------------------------------------------------------------------------|
+| `--image`          | `-i`       | Yes      | N/A        | String       | Pathway to image.                                                                                 |
+| `--mask`           | `-m`       | Yes      | N/A        | String       | Pathway to mask.                                                                                  |
+| `--model`          | `-mod`     | Yes      | N/A        | String       | Pathway to prediction model.                                                                      |
+| `--out`            | `-o`       | Yes      | N/A        | String       | Path to the output data folder.                                                                   |
+| `--size`           | `-s`       | No       | (256, 256) | List of int  | Size of images for training.                                                                      |
+| `--resizing_factor`| `-rf`      | No       | 0.6        | Float        | Resizing factor for images.                                                                       |
+| `--expansion`      | `-e`       | No       | 25         | Int          | Expansion factor for images.                                                                      |
+| `--precision`      | `-p`       | No       | 32         | String       | Precision for training. Options: `["16-mixed", "bf16-mixed", "16-true", "bf16-true", "32", "64"]` |
+| `--device`         | `-d`       | No       | "cpu"      | String       | Device to be used for training.                                                                   |
+| `--batch_size`     | `-bs`      | No       | 32         | Int          | Batch size for training.                                                                          |
+| `--workers`        | `-w`       | No       | 0          | Int          | Number of workers for training/testing.                                                           |
 
 
 ## Tutorial 
-- [ ] TODO: A Jupiter notebook tutorial 
-- [ ] TODO: Add a minimal test dataset
-- [ ] TODO: Provide the default model 
-
-A test dataset has been provided in the data folder with an image and it's associated mask. 
+- [ ] TODO: A Jupiter notebook tutorial
 
 ## Contributing
 
@@ -95,6 +91,6 @@ of conduct, and the process for submitting pull requests to us.
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License v3.0](LICENSE) - see the [LICENSE.md](LICENSE.md) file and [ESSENTIAL_LICENSE_CONDITIONS.txt](ESSENTIAL_LICENSE_CONDITIONS.txt) for
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE) - see the [LICENSE](LICENSE) file and [ESSENTIAL_LICENSE_CONDITIONS.txt](ESSENTIAL_LICENSE_CONDITIONS.txt) for
 details
 
