@@ -12,17 +12,7 @@ micronuclAI is an automated pipeline for reliable quantification of micronuclei 
 
 ### Stream-lit App
 
-A Quick implementation is available through 
-[StreamLit](http://129.206.6.173:8080/app/cin_streamlit?sp_hide_navbar=true).
-
-```
-name: reviewer
-password: micronuclAI_review
-```
-
-![screenshot](images/streamlit_app.png)
-
-Inference of micronuclei can be achieved in small to medium sized example images that can be uploaded to the streamlit app. Image data is processed within a virtual machine (VM) on Heicloud, a local Cloud infrastructure provided by University Computing Center Heidelberg, and images are immediately deleted after micronuclei inference. Once micronuclei are inferred, results predictions as well as several plots describing the results are generated and presented to the user within the streamlit app which can also be downloaded as csv files. 
+a Web-App implementation of micronuclAI will be made available soon via Streamlit. Stay tuned!
 
 ### Local Installation 
 
