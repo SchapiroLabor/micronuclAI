@@ -91,3 +91,10 @@ python src/model/prediction2.py -i ./test/test_image.tiff -m ./test/test_mask.ti
 
 micronuclAI offers a dual licensing mode the [GNU Affero General Public License v3.0](LICENSE) - see [LICENSE](LICENSE) and [ESSENTIAL_LICENSE_CONDITIONS.txt](ESSENTIAL_LICENSE_CONDITIONS.txt)
 
+## Citation
+
+https://doi.org/10.1101/2024.05.24.595722
+
+```
+Ibarra-Arellano, M. A., Caprio, L. A., Hada, A., Stotzem, N., Cai, L., Shah, S., Melms, J. C., Wünneman, F., Izar, B., & Schapiro, D. (2024). micronuclAI: Automated quantification of micronuclei for assessment of chromosomal instability. Cold Spring Harbor Laboratory. https://doi.org/10.1101/2024.05.24.595722
+```
