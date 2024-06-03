@@ -12,14 +12,15 @@ micronuclAI is an automated pipeline for reliable quantification of micronuclei 
 
 ### Stream-lit App
 
-A Quick implementation is available through
+A webapp implementation of micronuclAI is available through streamlit under:
 
-Curently updating, sorry for the inconvenience. New URL will be shared shortly.
+**GitHub:**  
+https://github.com/SchapiroLabor/micronuclAI_streamlit
 
-```
-name: reviewer
-password: micronuclAI_review
-```
+**Streamlit:**  
+https://micronuclai.streamlit.app
+
+
 
 ![screenshot](images/streamlit_app.png)
 
