@@ -87,10 +87,6 @@ python src/model/prediction2.py -i ./test/test_image.tiff -m ./test/test_mask.ti
 | `--workers`        | `-w`       | No       | 0          | Int          | Number of workers for training/testing.                                                           |
 
 
-## License
-
-micronuclAI offers a dual licensing mode the [GNU Affero General Public License v3.0](LICENSE) - see [LICENSE](LICENSE) and [ESSENTIAL_LICENSE_CONDITIONS.txt](ESSENTIAL_LICENSE_CONDITIONS.txt)
-
 ## Citation
 
 https://doi.org/10.1101/2024.05.24.595722
@@ -106,3 +102,7 @@ https://doi.org/10.1101/2024.05.24.595722
   month = may 
 }
 ```
+
+## License
+
+micronuclAI offers a dual licensing mode the [GNU Affero General Public License v3.0](LICENSE) - see [LICENSE](LICENSE) and [ESSENTIAL_LICENSE_CONDITIONS.txt](ESSENTIAL_LICENSE_CONDITIONS.txt)
