@@ -71,26 +71,11 @@ def main(args):
         "val":   get_transforms(resize=args.size, single_channel=args.single_channel, training=False)
     }
 
-    # Set pathways
-    RESULTS_FOLDER = args.out
-
     # Create two dataset objects with different transformations (to not have augmentations in validation and test set later)
     data_train = CINDataset(csv_path=args.labels, images_folder=args.images, transform=transform["train"])
     data_test  = CINDataset(csv_path=args.test, images_folder=args.images, transform=transform["val"])
     print(f"Dataset contains  = {len(data_train)} images.")
     print(f"Data distribution = \n{data_train.df['label'].value_counts()} images.")
-
-    # Split data into train and test (uses 1/10 of data for testing)
-    # train_val_indices, test_indices = train_test_split(data_train.df.index,
-    #                                                   test_size=1/10,
-    #                                                   stratify=data_train.df["label"],
-    #                                                   random_state=42)
-
-    # Split data into train and validation (uses 1/9 of data for validation)
-    # train_indices, val_indices = train_test_split(data_train.df.index,
-    #                                              test_indices=1/5,
-    #                                              stratify=data_train.df["label"],
-    #                                              random_state=42)
 
     # Cross validation k-fold
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -135,19 +120,20 @@ def main(args):
 
         # Save model
         # MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model_{str(k)}.pt")
-        MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model.pt")
+        MODEL_FILE = args.out / f"models/model_{k}.pt"
         MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
         torch.save(model, MODEL_FILE)
 
         ########################################
         # FROM HERE ON VALIDATION
         # Create validation folder if it does not exist
-        RESULTS_FOLDER.joinpath("validation").mkdir(parents=True, exist_ok=True)
+        VALIDATION_FOLDER = args.out / "validation"
+        VALIDATION_FOLDER.mkdir(parents=True, exist_ok=True)
 
         # Save validation results and metrics
-        VAL_METRICS = RESULTS_FOLDER.joinpath(f"validation/val_scores.csv")
-        VAL_CONFMTRX = RESULTS_FOLDER.joinpath(f"validation/val_confusion_matrix.pdf")
-        VAL_PREDICTIONS = RESULTS_FOLDER.joinpath(f"validation/val_predictions.csv")
+        VAL_METRICS = VALIDATION_FOLDER / f"val_scores_{k}.csv"
+        VAL_CONFMTRX = VALIDATION_FOLDER / f"confusion_matrix_{k}.csv"
+        VAL_PREDICTIONS = VALIDATION_FOLDER / f"predictions_{k}.csv"
 
         # Get validation scores
         df_val = model.get_val_pred_scores()
@@ -165,13 +151,14 @@ def main(args):
 
         ########################################
         # FROM HERE ON TEST
-        # Create test folder if it does not exist
-        RESULTS_FOLDER.joinpath("test").mkdir(parents=True, exist_ok=True)
+        # Create validation folder if it does not exist
+        TEST_FOLDER = args.out / "test"
+        TEST_FOLDER.mkdir(parents=True, exist_ok=True)
 
         # Save test results and metrics
-        TEST_METRICS = RESULTS_FOLDER.joinpath(f"test/test_scores.csv")
-        TEST_CONFMTRX = RESULTS_FOLDER.joinpath(f"test/test_confusion_matrix.pdf")
-        TEST_PREDICTIONS = RESULTS_FOLDER.joinpath(f"test/test_predictions.csv")
+        TEST_METRICS = TEST_FOLDER / f"test_scores{k}.csv"
+        TEST_CONFMTRX = TEST_FOLDER / f"test_confusion_matrix{k}.pdf"
+        TEST_PREDICTIONS = TEST_FOLDER / f"test_predictions{k}.csv"
 
         # Get test scores
         df_test = model.get_test_pred_scores()
@@ -186,6 +173,7 @@ def main(args):
 
         # Save test predictions
         df_test.to_csv(TEST_PREDICTIONS, index=False)
+
 
 if __name__ == "__main__":
     # Read arguments from command line
