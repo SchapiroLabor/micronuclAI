@@ -26,6 +26,8 @@ def get_args():
                        help="Pathway to input image folder.")
     input.add_argument("-l", "--labels", dest="labels", action="store", required=True,
                        help="Pathway to label file.")
+    input.add_argument("-t", "--test", dest="test", action="store", required=True,
+                       help="Pathway to test label file.")
 
     # Training options
     training = parser.add_argument_group(title="Training")
@@ -62,7 +64,8 @@ def get_args():
 def main(args):
     torch.set_float32_matmul_precision('high')
 
-    # Set transformations
+    # Set transformations for the data
+    print("Loading transformations")
     transform = {
         "train": get_transforms(resize=args.size, single_channel=args.single_channel, training=True),
         "val":   get_transforms(resize=args.size, single_channel=args.single_channel, training=False)
@@ -73,109 +76,116 @@ def main(args):
 
     # Create two dataset objects with different transformations (to not have augmentations in validation and test set later)
     data_train = CINDataset(csv_path=args.labels, images_folder=args.images, transform=transform["train"])
-    data_valid = CINDataset(csv_path=args.labels, images_folder=args.images, transform=transform["val"])
-    print(f"Dataset contains =  {len(data_train)} images.")
+    data_test  = CINDataset(csv_path=args.test, images_folder=args.images, transform=transform["val"])
+    print(f"Dataset contains  = {len(data_train)} images.")
+    print(f"Data distribution = \n{data_train.df['label'].value_counts()} images.")
 
     # Split data into train and test (uses 1/10 of data for testing)
-    train_val_indices, test_indices = train_test_split(data_train.df.index,
-                                                       test_size=1/10,
-                                                       stratify=data_train.df["label"],
-                                                       random_state=42)
+    # train_val_indices, test_indices = train_test_split(data_train.df.index,
+    #                                                   test_size=1/10,
+    #                                                   stratify=data_train.df["label"],
+    #                                                   random_state=42)
 
     # Split data into train and validation (uses 1/9 of data for validation)
-    train_indices, val_indices = train_test_split(train_val_indices,
-                                                  test_indices=1/9,
-                                                  stratify=data_train.df["label"].loc[train_val_indices],
-                                                  random_state=42)
+    # train_indices, val_indices = train_test_split(data_train.df.index,
+    #                                              test_indices=1/5,
+    #                                              stratify=data_train.df["label"],
+    #                                              random_state=42)
 
-    # Set loggers
-    csv_logger = CSVLogger(args.out, name=f"{args.model}_s{args.size[0]}_bs{args.batch_size}_p{args.precision}", version=f"log")
+    # Cross validation k-fold
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    for k, (train_indices, val_indices) in enumerate(skf.split(data_train.df["image"],
+                                                               data_train.df["label"])):
 
-    # Get subsets of data
-    train_set = torch.utils.data.Subset(data_train, train_indices)
-    val_set = torch.utils.data.Subset(data_valid, val_indices)
-    test_set = torch.utils.data.Subset(data_valid, test_indices)
-    datasets = (train_set, val_set, test_set)
+        # Set loggers
+        csv_logger = CSVLogger(args.out,
+                               name=f"{args.model}_s{args.size[0]}_bs{args.batch_size}_p{args.precision}",
+                               version=f"log")
 
-    # Print final ammount of training, validation and test data
-    print(f"Training data   = {len(train_set)}")
-    print(f"Validation data = {len(val_set)}")
-    print(f"Test data       = {len(test_set)}")
+        # Get subsets of data for train/validation and test
+        train_set = torch.utils.data.Subset(data_train, train_indices)
+        val_set = torch.utils.data.Subset(data_train, val_indices)
+        #test_set = torch.utils.data.Subset(data_test, data_test.df.index) # Use all indexes for the test dataset
+        datasets = (train_set, val_set, data_test)
 
-    # set hyper parameters
-    hparams = {
-        "batch_size": args.batch_size,
-        "learning_rate": 3e-4,
-    }
+        # Print final ammount of training, validation and test data
+        print(f"Training data   = {len(train_set)}")
+        print(f"Validation data = {len(val_set)}")
+        print(f"Test data       = {len(data_test)}")
 
-    # Set model
-    model = MulticlassRegression(hparams, datasets, EfficientNetClassifier(model=args.model))
+        # set hyper parameters
+        hparams = {
+            "batch_size": args.batch_size,
+            "learning_rate": 3e-4,
+        }
 
-    # Training model
-    trainer = pl.Trainer(
-        precision= args.precision,
-        accelerator="auto",
-        max_epochs=300,
-        #log_every_n_steps=1,
-        callbacks=[EarlyStopping(monitor="val_loss", mode="min")],
-        logger=csv_logger
-    )
-    trainer.fit(model)
+        # Set model
+        model = MulticlassRegression(hparams, datasets, EfficientNetClassifier(model=args.model))
 
-    # Save model
-    # MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model_{str(k)}.pt")
-    MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model.pt")
-    MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(model, MODEL_FILE)
+        # Training model
+        trainer = pl.Trainer(
+            precision= args.precision,
+            accelerator="auto",
+            max_epochs=300,
+            #log_every_n_steps=1,
+            callbacks=[EarlyStopping(monitor="val_loss", mode="min")],
+            logger=csv_logger
+        )
+        trainer.fit(model)
 
-    ########################################
-    # FROM HERE ON TEST
-    # Create test folder if it does not exist
-    RESULTS_FOLDER.joinpath("test").mkdir(parents=True, exist_ok=True)
+        # Save model
+        # MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model_{str(k)}.pt")
+        MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model.pt")
+        MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(model, MODEL_FILE)
 
-    # Save test results and metrics
-    TEST_METRICS = RESULTS_FOLDER.joinpath(f"test/test_scores.csv")
-    TEST_CONFMTRX = RESULTS_FOLDER.joinpath(f"test/test_confusion_matrix.pdf")
-    TEST_PREDICTIONS = RESULTS_FOLDER.joinpath(f"test/test_predictions.csv")
+        ########################################
+        # FROM HERE ON VALIDATION
+        # Create validation folder if it does not exist
+        RESULTS_FOLDER.joinpath("validation").mkdir(parents=True, exist_ok=True)
 
-    # Get test scores
-    df_test = model.get_test_pred_scores()
+        # Save validation results and metrics
+        VAL_METRICS = RESULTS_FOLDER.joinpath(f"validation/val_scores.csv")
+        VAL_CONFMTRX = RESULTS_FOLDER.joinpath(f"validation/val_confusion_matrix.pdf")
+        VAL_PREDICTIONS = RESULTS_FOLDER.joinpath(f"validation/val_predictions.csv")
 
-    # Get test metrics
-    df_test_metrics = evaluate_multiclass_model(df_test["prediction"], df_test["target"])
-    df_test_metrics.T.to_csv(TEST_METRICS, index=True)
+        # Get validation scores
+        df_val = model.get_val_pred_scores()
 
-    # Get plot for test data
-    fig = plot_confusion_matrix(df_test["prediction"], df_test["target"])
-    fig.savefig(TEST_CONFMTRX, dpi=300)
+        # Get validation metrics
+        df_val_metrics = evaluate_multiclass_model(df_val["prediction"], df_val["target"])
+        df_val_metrics.T.to_csv(VAL_METRICS, index=True)
 
-    # Save test predictions
-    df_test.T.to_csv(TEST_PREDICTIONS, index=False)
+        # Get plot for validation data
+        fig = plot_confusion_matrix(df_val["prediction"], df_val["target"])
+        fig.savefig(VAL_CONFMTRX, dpi=300)
 
-    ########################################
-    # FROM HERE ON VALIDATION
-    # Create validation folder if it does not exist
-    RESULTS_FOLDER.joinpath("validation").mkdir(parents=True, exist_ok=True)
+        # Save validation predictions
+        df_val.to_csv(VAL_PREDICTIONS, index=False)
 
-    # Save validation results and metrics
-    VAL_METRICS = RESULTS_FOLDER.joinpath(f"validation/val_scores.csv")
-    VAL_CONFMTRX = RESULTS_FOLDER.joinpath(f"validation/val_confusion_matrix.pdf")
-    VAL_PREDICTIONS = RESULTS_FOLDER.joinpath(f"validation/val_predictions.csv")
+        ########################################
+        # FROM HERE ON TEST
+        # Create test folder if it does not exist
+        RESULTS_FOLDER.joinpath("test").mkdir(parents=True, exist_ok=True)
 
-    # Get validation scores
-    df_val = model.get_val_pred_scores()
+        # Save test results and metrics
+        TEST_METRICS = RESULTS_FOLDER.joinpath(f"test/test_scores.csv")
+        TEST_CONFMTRX = RESULTS_FOLDER.joinpath(f"test/test_confusion_matrix.pdf")
+        TEST_PREDICTIONS = RESULTS_FOLDER.joinpath(f"test/test_predictions.csv")
 
-    # Get validation metrics
-    df_val_metrics = evaluate_multiclass_model(df_val["prediction"], df_val["target"])
-    df_val_metrics.T.to_csv(VAL_METRICS, index=True)
+        # Get test scores
+        df_test = model.get_test_pred_scores()
 
-    # Get plot for validation data
-    fig = plot_confusion_matrix(df_val["prediction"], df_val["target"])
-    fig.savefig(VAL_CONFMTRX, dpi=300)
+        # Get test metrics
+        df_test_metrics = evaluate_multiclass_model(df_test["prediction"], df_test["target"])
+        df_test_metrics.T.to_csv(TEST_METRICS, index=True, header=False)
 
-    # Save validation predictions
-    df_val.to_csv(VAL_PREDICTIONS, index=False)
+        # Get plot for test data
+        fig = plot_confusion_matrix(df_test["prediction"], df_test["target"])
+        fig.savefig(TEST_CONFMTRX, dpi=300)
 
+        # Save test predictions
+        df_test.to_csv(TEST_PREDICTIONS, index=False)
 
 if __name__ == "__main__":
     # Read arguments from command line
