@@ -79,7 +79,7 @@ class MulticlassRegression(pl.LightningModule):
         
         preds = out.argmax(axis=1)
         n_correct = (targets == preds).sum()
-        return loss, n_correct
+        return loss.detach(), n_correct
 
     def general_end(self, outputs, mode):
         # average over all batches aggregated during one epoch
