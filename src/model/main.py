@@ -132,7 +132,7 @@ def main(args):
 
         # Save validation results and metrics
         VAL_METRICS = VALIDATION_FOLDER / f"val_scores_{k}.csv"
-        VAL_CONFMTRX = VALIDATION_FOLDER / f"confusion_matrix_{k}.csv"
+        VAL_CONFMTRX = VALIDATION_FOLDER / f"confusion_matrix_{k}.pdf"
         VAL_PREDICTIONS = VALIDATION_FOLDER / f"predictions_{k}.csv"
 
         # Get validation scores
