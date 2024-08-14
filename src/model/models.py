@@ -91,16 +91,16 @@ class MulticlassRegression(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         loss, n_correct = self.general_step(batch, batch_idx, "train")
         self.log("train_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        return {'loss': loss.detach(), 'train_n_correct': n_correct}
+        return {'loss': loss, 'train_n_correct': n_correct}
 
     def validation_step(self, batch, batch_idx):
         loss, n_correct = self.general_step(batch, batch_idx, "val")
         self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        return {'val_loss': loss.detach(), 'val_n_correct': n_correct}
+        return {'val_loss': loss, 'val_n_correct': n_correct}
 
     def test_step(self, batch, batch_idx):
         loss, n_correct = self.general_step(batch, batch_idx, "test")
-        return {'test_loss': loss.detach(), 'test_n_correct': n_correct}
+        return {'test_loss': loss, 'test_n_correct': n_correct}
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         return self(batch).squeeze().cpu().numpy()
