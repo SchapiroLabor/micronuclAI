@@ -78,7 +78,7 @@ class MulticlassRegression(pl.LightningModule):
         loss = F.mse_loss(out, targets)
         
         preds = out.argmax(axis=1)
-        n_correct = (targets == preds).sum()
+        n_correct = (targets == preds).sum().detach()
         return loss, n_correct
 
     def general_end(self, outputs, mode):
