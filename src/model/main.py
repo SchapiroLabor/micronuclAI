@@ -142,7 +142,7 @@ def main(args):
 
         # Get validation metrics
         df_val_metrics = evaluate_multiclass_model(df_val["prediction"], df_val["target"])
-        df_val_metrics.T.to_csv(VAL_METRICS, index=True)
+        df_val_metrics.T.to_csv(VAL_METRICS, index=True, header=False)
 
         # Get plot for validation data
         fig = plot_confusion_matrix(df_val["prediction"], df_val["target"])
