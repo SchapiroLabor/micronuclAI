@@ -42,7 +42,8 @@ def get_args():
                           help="Precision for training. [Default = bf16-mixed]")
     training.add_argument("-sc", "--single_channel", dest="single_channel", action="store_true",
                             help="Use single channel images. [Default = False]")
-
+    training.add_argument("-k", "--kfold", dest="kfold", action="store", default=5, type=int,
+                            help="Number of folds for cross validation. [Default = 5]")
 
     # Tool output
     output = parser.add_argument_group(title="Output")
@@ -78,7 +79,7 @@ def main(args):
     print(f"Data distribution = \n{data_train.df['label'].value_counts()} images.")
 
     # Cross validation k-fold
-    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    skf = StratifiedKFold(n_splits=args.kfold, shuffle=True, random_state=42)
     for k, (train_indices, val_indices) in enumerate(skf.split(data_train.df["image"],
                                                                data_train.df["label"])):
 
