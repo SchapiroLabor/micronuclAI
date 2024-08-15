@@ -120,7 +120,7 @@ def main(args):
 
         # Save model
         # MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model_{str(k)}.pt")
-        MODEL_FOLDER = args.out / f"{args.model}_s{args.size[0]}_bs{args.batch_size}_p{args.precision}" / "trained_models"
+        MODEL_FOLDER = args.out / "trained_models"
         MODEL_FILE = MODEL_FOLDER / f"model_{k}.pt"
         MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
         torch.save(model, MODEL_FILE)
@@ -128,7 +128,7 @@ def main(args):
         ########################################
         # FROM HERE ON VALIDATION
         # Create validation folder if it does not exist
-        VALIDATION_FOLDER = args.out / f"{args.model}_s{args.size[0]}_bs{args.batch_size}_p{args.precision}" / "validation"
+        VALIDATION_FOLDER = args.out / "validation"
         VALIDATION_FOLDER.mkdir(parents=True, exist_ok=True)
 
         # Save validation results and metrics
@@ -153,7 +153,7 @@ def main(args):
         ########################################
         # FROM HERE ON TEST
         # Create validation folder if it does not exist
-        TEST_FOLDER = args.out / f"{args.model}_s{args.size[0]}_bs{args.batch_size}_p{args.precision}" / "test"
+        TEST_FOLDER = args.out / "test"
         TEST_FOLDER.mkdir(parents=True, exist_ok=True)
 
         # Save test results and metrics
