@@ -18,7 +18,7 @@ RUN apt-get update -qq && apt-get install -y \
 ARG MAMBA_ROOT_PREFIX=/opt/conda
 
 # Add /opt/conda/bin to the PATH
-ENV PATH $MAMBA_ROOT_PREFIX/bin:$PATH
+ENV PATH=$MAMBA_ROOT_PREFIX/bin:$PATH
 
 # Install dependencies with micromamba, clean afterwards
 RUN micromamba env create -f environment.yml \
