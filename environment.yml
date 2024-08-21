@@ -9,7 +9,7 @@ dependencies:
   - "numpy=1.25.2"
   - "pandas=2.2.2"
   - "Pillow=10.3.0"
-  - "pytorch_lightning=2.2.5"
+  - "pytorch-lightning"
   - "scikit-learn"
   - "seaborn=0.13.2"
   - "pytorch"
