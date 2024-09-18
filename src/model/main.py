@@ -125,7 +125,7 @@ def main(args):
         MODEL_FILE = MODEL_FOLDER / f"model_{k}.pt"
         MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
         print(f"Saving model to = {MODEL_FILE}")
-        torch.save(model.state_dict(), MODEL_FILE)
+        torch.save(model, MODEL_FILE)
 
         ########################################
         # FROM HERE ON VALIDATION
