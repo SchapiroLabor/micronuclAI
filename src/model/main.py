@@ -4,7 +4,7 @@ from pathlib import Path
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 from dataset import CINDataset
-from models import (EfficientNetClassifier, MulticlassRegression)
+from models import micronuclAI
 from augmentations import get_transforms
 from pytorch_lightning.loggers import CSVLogger
 from utils import evaluate_binary_model, evaluate_multiclass_model, plot_confusion_matrix
@@ -37,9 +37,11 @@ def get_args():
                             help="Size of images for training. [Default = (256, 256)]")
     training.add_argument("-b", "--batch_size", dest="batch_size", action="store", default=32, type=int,
                             help="Batch size for training. [Default = 32]")
+    training.add_argument("-w", "--num_workers", dest="num_workers", action="store", default=4, type=int,
+                          help="Number of workers for data loading. [Default = 4]")
     training.add_argument("-p" "--precision", dest="precision", action="store", default="32",
                           choices=["16-mixed", "bf16-mixed", "16-true", "bf16-true", "32", "64"],
-                          help="Precision for training. [Default = bf16-mixed]")
+                          help="Precision for training. [Default = 32]")
     training.add_argument("-sc", "--single_channel", dest="single_channel", action="store_true",
                             help="Use single channel images. [Default = False]")
     training.add_argument("-k", "--kfold", dest="kfold", action="store", default=5, type=int,
@@ -103,14 +105,16 @@ def main(args):
         hparams = {
             "batch_size": args.batch_size,
             "learning_rate": 3e-4,
+            "workers": args.num_workers,
         }
 
-        # Set model
-        model = MulticlassRegression(hparams, datasets, EfficientNetClassifier(model=args.model))
+        # Set model, pass parameters, datasets and model name to use
+        model = micronuclAI(hparams, datasets, args.model)
+        script = model.to_torchscript()
 
         # Training model
         trainer = pl.Trainer(
-            precision= args.precision,
+            precision=args.precision,
             accelerator="auto",
             max_epochs=300,
             #log_every_n_steps=1,
@@ -125,7 +129,8 @@ def main(args):
         MODEL_FILE = MODEL_FOLDER / f"model_{k}.pt"
         MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
         print(f"Saving model to = {MODEL_FILE}")
-        torch.save(model, MODEL_FILE)
+        # torch.save(model, MODEL_FILE)
+        torch.jit.save(script, MODEL_FILE)
 
         ########################################
         # FROM HERE ON VALIDATION
@@ -162,9 +167,9 @@ def main(args):
         TEST_FOLDER.mkdir(parents=True, exist_ok=True)
 
         # Save test results and metrics
-        TEST_METRICS = TEST_FOLDER / f"test_scores{k}.csv"
-        TEST_CONFMTRX = TEST_FOLDER / f"test_confusion_matrix{k}.pdf"
-        TEST_PREDICTIONS = TEST_FOLDER / f"test_predictions{k}.csv"
+        TEST_METRICS = TEST_FOLDER / f"test_scores_{k}.csv"
+        TEST_CONFMTRX = TEST_FOLDER / f"test_confusion_matrix_{k}.pdf"
+        TEST_PREDICTIONS = TEST_FOLDER / f"test_predictions_{k}.csv"
 
         # Get test scores
         df_test = model.get_test_pred_scores()
