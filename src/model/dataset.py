@@ -22,7 +22,7 @@ class CINDataset(torch.utils.data.Dataset):
         return image, label
 
 
-class CINPrediction(torch.utils.data.Dataset):
+class micronuclAI_inference(torch.utils.data.Dataset):
     def __init__(self, image, mask, resizing_factor=0.6, expansion=30, size=(256, 256), transform=None):
         self.size = size
         self.transform = transform
