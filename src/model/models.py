@@ -44,17 +44,13 @@ class EfficientNetClassifier(nn.Module):
 
     def forward(self, x):
         x = self.model.features(x)
-
         x = self.model.avgpool(x)
         x = torch.flatten(x, 1)
-
         x = self.model.classifier(x)
-
         return x
 
 
 class micronuclAI(pl.LightningModule):
-
     def __init__(self, hparams, dataset, model):
         super().__init__()
         self.model = EfficientNetClassifier(model)

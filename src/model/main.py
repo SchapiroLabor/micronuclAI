@@ -110,7 +110,6 @@ def main(args):
 
         # Set model, pass parameters, datasets and model name to use
         model = micronuclAI(hparams, datasets, args.model)
-        script = model.to_torchscript()
 
         # Training model
         trainer = pl.Trainer(
@@ -124,12 +123,13 @@ def main(args):
         trainer.fit(model)
 
         # Save model
-        # MODEL_FILE = RESULTS_FOLDER.joinpath(f"models/model_{str(k)}.pt")
         MODEL_FOLDER = args.out / "trained_models"
         MODEL_FILE = MODEL_FOLDER / f"model_{k}.pt"
         MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
         print(f"Saving model to = {MODEL_FILE}")
-        # torch.save(model, MODEL_FILE)
+
+        # Convert model to torchscript and save
+        script = model.to_torchscript()
         torch.jit.save(script, MODEL_FILE)
 
         ########################################
