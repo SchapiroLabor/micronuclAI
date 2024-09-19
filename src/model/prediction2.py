@@ -13,11 +13,10 @@ import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
 from augmentations import preprocess_test as preprocess
-from dataset import CINPrediction
+from dataset import micronuclAI_inference
 from torch.utils.data import DataLoader
-from models import (EfficientNetClassifier, MulticlassRegression)
 from augmentations import get_transforms
-
+from typing import Union, Tuple, Any
 
 def get_args():
     # Script description
@@ -110,12 +109,12 @@ def main(args):
     # Dataset
     print(f"Loading image from = {args.image}")
     print(f"Loading mask from  = {args.mask}")
-    dataset = CINPrediction(args.image,
-                            args.mask,
-                            resizing_factor=args.resizing_factor,
-                            expansion=args.expansion,
-                            size=args.size,
-                            transform=transform)
+    dataset = micronuclAI_inference(args.image,
+                                    args.mask,
+                                    resizing_factor=args.resizing_factor,
+                                    expansion=args.expansion,
+                                    size=args.size,
+                                    transform=transform)
 
     # Dataloader
     print(f"Batch size         = {args.batch_size}")
@@ -142,7 +141,6 @@ def main(args):
     args.out.mkdir(parents=True, exist_ok=True)
     df_predictions.to_csv(args.out.joinpath(f"{args.mask.stem}_predictions.csv"), index=False)
     df_summary.to_csv(args.out.joinpath(f"{args.mask.stem}_summary.csv"), index=True)
-
 
 
 if __name__ == "__main__":
