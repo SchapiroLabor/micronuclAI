@@ -34,19 +34,16 @@ def get_args():
                         help="Path to the output data folder")
 
     # Optional input
-    options = parser.add_argument_group(title="Non-required arguments")
+    options = parser.add_argument_group(title="Tool options")
     options.add_argument("-s", "--size", dest="size", action="store", required=False, default=(256, 256),
                          type=int, nargs="+", help="Size of images for training. [Default = (256, 256)]")
     options.add_argument("-rf", "--resizing_factor", dest="resizing_factor", action="store", required=False,
                          default=0.6, type=float, help="Resizing factor for images. [Default = 0.6]")
     options.add_argument("-e", "--expansion", dest="expansion", action="store", required=False, default=25,
                          type=int, help="Expansion factor for images. [Default = 25]")
-    options.add_argument("-p", "--precision", dest="precision", action="store", default="32",
-                         choices=["16-mixed", "bf16-mixed", "16-true", "bf16-true", "32", "64"],
-                         help="Precision for training. [Default = bf16-mixed]")
     options.add_argument("-d", "--device", dest="device", action="store", required=False, default="cpu",
                          help="Device to be used for training [default='cpu']")
-    options.add_argument("-l", "--log_level", dest="log_level", action="store", default="info",
+    options.add_argument("-log", "--log_level", dest="log_level", action="store", default="info",
                          choices=["debug", "info"],
                          help="Set the logging level. [Default = info]")
     options.add_argument("--version", action="version", version="micronuclAI 1.0.0")
@@ -136,11 +133,11 @@ def main():
 
     # Dataset
     lg.info(f"Creating dataset")
-    lg.debug(f"Loading image from = {args.image}")
-    lg.debug(f"Loading mask from  = {args.mask}")
-    lg.debug(f"Resizing factor   = {args.resizing_factor}")
-    lg.debug(f"Expansion         = {args.expansion}")
-    lg.debug(f"Size              = {args.size}")
+    lg.debug(f"Loading image from     = {args.image}")
+    lg.debug(f"Loading mask from      = {args.mask}")
+    lg.debug(f"Resizing factor        = {args.resizing_factor}")
+    lg.debug(f"Expansion              = {args.expansion}")
+    lg.debug(f"Size                   = {args.size}")
     dataset = micronuclAI_inference(args.image,
                                     args.mask,
                                     resizing_factor=args.resizing_factor,
@@ -148,14 +145,17 @@ def main():
                                     size=args.size,
                                     transform=transform)
 
-    # Create dataloader
-    lg.info("Creating dataloader")
+    # Create dataloader, set to 0 workers to avoid overhead with multiprocessing.
+    # a batch size of 32 should be easy to handle in most systems.
+    lg.info(f"Creating dataloader")
     dataloader = DataLoader(dataset,
                             num_workers=0,
                             batch_size=32)
 
     # Predict
     lg.info("Predicting")
+    lg.debug(f"Predicting with device = {args.device}")
+    lg.debug(f"Number of cell patches = {len(dataset)}")
     predictions = predict(model, dataloader, args.device)
 
     # Summarize
@@ -164,6 +164,8 @@ def main():
 
     # Save predictions and summary
     lg.info("Saving predictions and summary")
+    lg.debug(f"Saving predictions to {args.out / 'predictions.csv'}")
+    lg.debug(f"Saving summary to {args.out / 'summary.csv'}")
     df_predictions.to_csv(args.out / "predictions.csv", index=False)
     df_summary.to_csv(args.out / "summary.csv", index=False)
     lg.info("Done!")
