@@ -11,6 +11,7 @@ from utils import evaluate_binary_model, evaluate_multiclass_model, plot_confusi
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 import argparse
+from logger import set_logger
 
 
 def get_args():
@@ -28,6 +29,11 @@ def get_args():
                        help="Pathway to label file.")
     input.add_argument("-t", "--test", dest="test", action="store", required=True,
                        help="Pathway to test label file.")
+
+    # Tool output
+    output = parser.add_argument_group(title="Output")
+    output.add_argument("-o", "--out", dest="out", action="store", required=True,
+                        help="Pathway to results folder.")
 
     # Training options
     training = parser.add_argument_group(title="Training")
@@ -47,10 +53,13 @@ def get_args():
     training.add_argument("-k", "--kfold", dest="kfold", action="store", default=5, type=int,
                             help="Number of folds for cross validation. [Default = 5]")
 
-    # Tool output
-    output = parser.add_argument_group(title="Output")
-    output.add_argument("-o", "--out", dest="out", action="store", required=True,
-                        help="Pathway to results folder.")
+    # Script options
+    options = parser.add_argument_group(title="Script options")
+    options.add_argument("-log", "--log_level", dest="log_level", action="store", default="info",
+                         choices=["debug", "info"],
+                         help="Set the logging level. [Default = info]")
+    options.add_argument("--version", action="version", version="micronuclAI 1.0.0")
+
 
     # Parse arguments
     args = parser.parse_args()
@@ -64,21 +73,56 @@ def get_args():
     return args
 
 
-def main(args):
-    torch.set_float32_matmul_precision('high')
+def save_model(model, output_path, suffix="") -> None:
+    """
+    Save model to torchscript
+    :param output_path: Path to save model
+    :param suffix: Suffix to add to model name
+    :return: None
+    """
+    # Save model
+    MODEL_FOLDER = output_path / "trained_models"
+    MODEL_FILE = MODEL_FOLDER / f"model{suffix}.pt"
+    MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
+    print(f"Saving model to = {MODEL_FILE}")
 
-    # Set transformations for the data
-    print("Loading transformations")
+    # Convert model to torchscript and save
+    script = model.to_torchscript()
+    torch.jit.save(script, MODEL_FILE)
+
+
+def main():
+    torch.set_float32_matmul_precision('high')
+    # Read arguments from command line
+    args = get_args()
+
+    # Set logger
+    lg = set_logger(log_level=args.log_level)
+    lg.info("micronuclAI - Training")
+    lg.info(f"Model      = {args.model}")
+    lg.info(f"Batch size = {args.batch_size}")
+    lg.info(f"Image size = {args.size}")
+
+
+    # Load transformations for train and validation
+    lg.info("Loading transformations")
     transform = {
         "train": get_transforms(resize=args.size, single_channel=args.single_channel, training=True),
-        "val":   get_transforms(resize=args.size, single_channel=args.single_channel, training=False)
+        "test":   get_transforms(resize=args.size, single_channel=args.single_channel, training=False)
     }
 
     # Create two dataset objects with different transformations (to not have augmentations in validation and test set later)
     data_train = CINDataset(csv_path=args.labels, images_folder=args.images, transform=transform["train"])
-    data_test  = CINDataset(csv_path=args.test, images_folder=args.images, transform=transform["val"])
-    print(f"Dataset contains  = {len(data_train)} images.")
-    print(f"Data distribution = \n{data_train.df['label'].value_counts()} images.")
+    data_test  = CINDataset(csv_path=args.test, images_folder=args.images, transform=transform["test"])
+    lg.info(f"Dataset contains  = {len(data_train)} images.")
+    lg.info(f"Data distribution = \n{data_train.df['label'].value_counts()} images.")
+
+    # set hyper parameters
+    hparams = {
+        "batch_size": args.batch_size,
+        "learning_rate": 3e-4,
+        "workers": args.num_workers,
+    }
 
     # Cross validation k-fold
     skf = StratifiedKFold(n_splits=args.kfold, shuffle=True, random_state=42)
@@ -101,12 +145,7 @@ def main(args):
         print(f"Validation data = {len(val_set)}")
         print(f"Test data       = {len(data_test)}")
 
-        # set hyper parameters
-        hparams = {
-            "batch_size": args.batch_size,
-            "learning_rate": 3e-4,
-            "workers": args.num_workers,
-        }
+
 
         # Set model, pass parameters, datasets and model name to use
         model = micronuclAI(hparams, datasets, args.model)
@@ -122,84 +161,20 @@ def main(args):
         )
         trainer.fit(model)
 
+        ########################################
         # Save model
-        MODEL_FOLDER = args.out / "trained_models"
-        MODEL_FILE = MODEL_FOLDER / f"model_{k}.pt"
-        MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
-        print(f"Saving model to = {MODEL_FILE}")
-
-        # Convert model to torchscript and save
-        script = model.to_torchscript()
-        torch.jit.save(script, MODEL_FILE)
+        save_model(model, args.out, suffix=f"_{k}")
 
         ########################################
-        # FROM HERE ON VALIDATION
-        # Create validation folder if it does not exist
-        VALIDATION_FOLDER = args.out / "validation"
-        VALIDATION_FOLDER.mkdir(parents=True, exist_ok=True)
-
-        # Save validation results and metrics
-        VAL_METRICS = VALIDATION_FOLDER / f"val_scores_{k}.csv"
-        VAL_CONFMTRX = VALIDATION_FOLDER / f"confusion_matrix_{k}.pdf"
-        VAL_PREDICTIONS = VALIDATION_FOLDER / f"predictions_{k}.csv"
-
+        # VALIDATION
         # Get validation scores
-        df_val = model.get_val_pred_scores()
-
-        # Get validation metrics
-        df_val_metrics = evaluate_multiclass_model(df_val["prediction"], df_val["target"])
-        print(f"Saving validation metrics to = {VAL_METRICS}")
-        df_val_metrics.T.to_csv(VAL_METRICS, index=True, header=False)
-
-        # Get plot for validation data
-        fig = plot_confusion_matrix(df_val["prediction"], df_val["target"])
-        print(f"Saving validation confusion matrix to = {VAL_CONFMTRX}")
-        fig.savefig(VAL_CONFMTRX, dpi=300)
-
-        # Save validation predictions
-        print(f"Saving validation predictions to = {VAL_PREDICTIONS}")
-        df_val.to_csv(VAL_PREDICTIONS, index=False)
+        model.get_val_pred_scores(output_path=args.out, suffix=f"_{k}")
 
         ########################################
-        # FROM HERE ON TEST
-        # Create test folder if it does not exist
-        TEST_FOLDER = args.out / "test"
-        TEST_FOLDER.mkdir(parents=True, exist_ok=True)
-
-        # Save test results and metrics
-        TEST_METRICS = TEST_FOLDER / f"test_scores_{k}.csv"
-        TEST_CONFMTRX = TEST_FOLDER / f"test_confusion_matrix_{k}.pdf"
-        TEST_PREDICTIONS = TEST_FOLDER / f"test_predictions_{k}.csv"
-
+        # TEST
         # Get test scores
-        df_test = model.get_test_pred_scores()
-
-        # Get test metrics
-        df_test_metrics = evaluate_multiclass_model(df_test["prediction"], df_test["target"])
-        print(f"Saving test metrics to = {TEST_METRICS}")
-        df_test_metrics.T.to_csv(TEST_METRICS, index=True, header=False)
-
-        # Get plot for test data
-        fig = plot_confusion_matrix(df_test["prediction"], df_test["target"])
-        print(f"Saving test confusion matrix to = {TEST_CONFMTRX}")
-        fig.savefig(TEST_CONFMTRX, dpi=300)
-
-        # Save test predictions
-        print(f"Saving test predictions to = {TEST_PREDICTIONS}")
-        df_test.to_csv(TEST_PREDICTIONS, index=False)
+        model.get_test_pred_scores(output_path=args.out, suffix=f"_{k}")
 
 
 if __name__ == "__main__":
-    # Read arguments from command line
-    args = get_args()
-
-    # Log arguments
-    print(f"Model      = {args.model}")
-    print(f"Batch size = {args.batch_size}")
-    print(f"Image size = {args.size}")
-
-    # Run script and calculate run time
-    st = time.time()
-    main(args)
-    rt = time.time() - st
-    print(f"Script finish in {rt//60:.0f}m {rt%60:.0f}s")
+    main()
