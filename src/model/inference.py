@@ -12,6 +12,7 @@ from augmentations import get_transforms
 from logger import set_logger
 from typing import Any
 
+
 def get_args():
     # Script description
     description = """micronuclAI prediction script - Predicts the amount of micro-nuclei in the input image."""
@@ -31,7 +32,9 @@ def get_args():
     # Tool output
     output = parser.add_argument_group(title="Output")
     output.add_argument("-o", "--out", dest="out", action="store", required=True,
-                        help="Path to the output data folder")
+                        help="Path to the output folder")
+    output.add_argument("-f", "--file-name", dest="file_name", action="store", required=False, default=None,
+                        help="Name of the output file, if not filename provided it will take the mask file name.")
 
     # Optional input
     options = parser.add_argument_group(title="Tool options")
@@ -99,7 +102,6 @@ def summarize(predictions) -> tuple[DataFrame, Any]:
 
     # Get dataset summary
     df_summary = df_predictions["micronuclei"].value_counts()
-
     total = df_summary.sum()
     total_micronuclei = sum(df_summary.index * df_summary.values)
     cells_with_micronuclei = df_summary[df_summary.index > 0].sum()
@@ -164,10 +166,18 @@ def main():
 
     # Save predictions and summary
     lg.info("Saving predictions and summary")
-    lg.debug(f"Saving predictions to {args.out / 'predictions.csv'}")
-    lg.debug(f"Saving summary to {args.out / 'summary.csv'}")
-    df_predictions.to_csv(args.out / "predictions.csv", index=False)
-    df_summary.to_csv(args.out / "summary.csv", index=False)
+
+    # Take the mask file name and use it
+    if args.file_name is not None:
+        file_name = args.file_name
+    else:
+        file_name = args.mask.stem
+
+    lg.debug(f"Saving predictions to {args.out / file_name}_predictions.csv")
+    lg.debug(f"Saving summary to {args.out / file_name}_summary.csv")
+    args.out.mkdir(parents=True, exist_ok=True)  # Creates output directory if it doesn't exist
+    df_predictions.to_csv(args.out / f"{file_name}_predictions.csv", index=False)
+    df_summary.to_csv(args.out / f"{file_name}_summary.csv", index=True)
     lg.info("Done!")
 
 
