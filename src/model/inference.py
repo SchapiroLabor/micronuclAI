@@ -152,7 +152,7 @@ def main():
     lg.info(f"Creating dataloader")
     dataloader = DataLoader(dataset,
                             num_workers=0,
-                            batch_size=32)
+                            batch_size=64)
 
     # Predict
     lg.info("Predicting")
@@ -178,6 +178,7 @@ def main():
     args.out.mkdir(parents=True, exist_ok=True)  # Creates output directory if it doesn't exist
     df_predictions.to_csv(args.out / f"{file_name}_predictions.csv", index=False)
     df_summary.to_csv(args.out / f"{file_name}_summary.csv", index=True)
+    lg.debug(f"{df_summary}")
     lg.info("Done!")
 
 

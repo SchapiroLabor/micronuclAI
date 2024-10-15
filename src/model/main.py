@@ -73,7 +73,9 @@ def get_args():
 
 def save_model(model, output_path, suffix="") -> None:
     """
-    Save model to torchscript
+    Save model to TorchScript format
+
+    :param model: Model to save
     :param output_path: Path to save model
     :param suffix: Suffix to add to model name
     :return: None
@@ -84,7 +86,7 @@ def save_model(model, output_path, suffix="") -> None:
     MODEL_FILE.parent.mkdir(parents=True, exist_ok=True)
     print(f"Saving model to = {MODEL_FILE}")
 
-    # Convert model to torchscript and save
+    # Convert model to TorchScript and save
     script = model.to_torchscript()
     torch.jit.save(script, MODEL_FILE)
 
@@ -93,7 +95,7 @@ def cv_training(args, data_train, data_test, hparams) -> None:
     """
     Perform k-fold cross-validation and train the model on each fold.
 
-    :param args: Arguments containing model, size, batch_size precision, kfold and output path.
+    :param args: Arguments containing model, size, batch_size precision, k-fold and output path.
     :param data_train: Training data
     :param data_test: Test data
     :param hparams: Hyperparameters for the model.
@@ -151,7 +153,7 @@ def no_cv_training(args, data_train, data_test, hparams) -> None:
     """
     Train a model with no cross-validation on all the data.
     
-    :param args: Arguments containing model, size, batch_size precision, kfold and output path.
+    :param args: Arguments containing model, size, batch_size precision, k-fold and output path.
     :param data_train: Training data
     :param data_test: Test data
     :param hparams: Hyperparameters for the model.
