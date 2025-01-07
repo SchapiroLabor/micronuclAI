@@ -1,0 +1,14 @@
+micronuclAI offers a dual licensing model.
+
+You can redistribute micronuclAI and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The GNU Affero General Public License is designed to ensure that if a modified version is distributed or made accessible on a server (e.g. in a SaaS offering), the modified source code becomes available to the community.
+
+If you wish to use micronuclAI under alternate terms, you may obtain a commercial license to micronuclAI. Contact us for more information:
+
+©2024 Heidelberg University and The Trustees of Columbia University in the City of New York. This work may be reproduced, distributed, and otherwise exploited for academic non-commercial purposes only.
+To obtain a license to use this work for commercial purposes, please contact ScienceValue Heidelberg GmbH at ScienceValue.Heidelberg@med.uni-heidelberg.de.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.

@@ -1,0 +1,22 @@
+name: micronuclAI
+channels:
+  - conda-forge
+  - pytorch
+  - anaconda
+dependencies:
+  - "python=3.10"
+  - "matplotlib=3.7.1"
+  - "numpy=1.25.2"
+  - "pandas=2.2.2"
+  - "Pillow=10.3.0"
+  - "pytorch-lightning"
+  - "scikit-learn"
+  - "seaborn=0.13.2"
+  - "pytorch"
+  - "torchvision"
+  - "cpuonly"
+  - "tqdm=4.66.4"
+  - "imagecodecs>=2023.1.23"
+  - "pip"
+  - pip:
+    - "mask2bbox==0.0.20"
