@@ -16,6 +16,7 @@ from augmentations import preprocess_test as preprocess
 from dataset import micronuclAI_inference
 from torch.utils.data import DataLoader
 from augmentations import get_transforms
+from pytorch_lightning import LightningModule
 from typing import Union, Tuple, Any
 
 def get_args():
@@ -97,7 +98,8 @@ def main(args):
     # Load model
     print(f"Loading model     = {args.model}")
     print(f"Using device      = {args.device}")
-    model = torch.load(args.model, map_location=args.device)
+    model = torch.jit.load(args.model, map_location=args.device)
+    model = ScriptedModelWrapper(model)
 
     # Predicting
     trainer = pl.Trainer(precision=args.precision,
@@ -142,6 +144,13 @@ def main(args):
     df_predictions.to_csv(args.out.joinpath(f"{args.mask.stem}_predictions.csv"), index=False)
     df_summary.to_csv(args.out.joinpath(f"{args.mask.stem}_summary.csv"), index=True)
 
+class ScriptedModelWrapper(LightningModule):
+    def __init__(self, scripted_model):
+        super().__init__()
+        self.scripted_model = scripted_model
+
+    def forward(self, x):
+        return self.scripted_model(x)
 
 if __name__ == "__main__":
     # Read arguments from command line

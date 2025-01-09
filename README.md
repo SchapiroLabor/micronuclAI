@@ -20,8 +20,6 @@ https://github.com/SchapiroLabor/micronuclAI_streamlit
 **Streamlit:**  
 https://micronuclai.streamlit.app
 
-
-
 ![screenshot](images/streamlit_app.png)
 
 Inference of micronuclei can be achieved in small to medium-sized example images that can be uploaded to the streamlit app. Image data is processed within a virtual machine (VM) on Heicloud, a local Cloud infrastructure provided by University Computing Center Heidelberg, and images are immediately deleted after micronuclei inference. Once micronuclei are inferred, results predictions as well as several plots describing the results are generated and presented to the user within the streamlit app which can also be downloaded as csv files. 
@@ -29,7 +27,6 @@ Inference of micronuclei can be achieved in small to medium-sized example images
 ### Local Installation 
 
 ### Prerequisites
-
 
 Two input files are required for micronuclAI
 1. Nuclei-stained Image 
@@ -40,7 +37,7 @@ Two input files are required for micronuclAI
 A step by step series of examples that tell you how to get a development
 environment running locally
 
-Please ensure you have Python>=3.10 installed with 
+Please ensure you have Python>=3.10 but less than Python<=3.13 installed with 
 
 ``` bash
 python -version
