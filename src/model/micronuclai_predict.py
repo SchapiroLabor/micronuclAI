@@ -90,7 +90,7 @@ def inference(model, dataloader, device, log=None):
 
     # Create dictionary with results
     dict_tmp = {
-        "image": ids,
+        "cellID": ids,
         "score": scores
     }
 
