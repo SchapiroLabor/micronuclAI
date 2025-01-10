@@ -59,13 +59,13 @@ Install the required libraries
 To use micronuclAI on your own images:
 
 ```
-python src/model/prediction2.py -i <path/to/image> -m <path/to/mask> -mod <path/to/model> -o <path/to/output/folder>
+python src/model/micronuclai_predict.py -i <path/to/image> -m <path/to/mask> -mod <path/to/model> -o <path/to/output/folder>
 ```
 
 A test dataset has been provided in the [test_data](test) folder with a [mask](test/test_mask.tiff) and its corresponding [image](test/test_image.tiff) file.
 
 ```
-python src/model/prediction2.py -i ./test/test_image.tiff -m ./test/test_mask.tiff -mod ./micronuclAI_model/micronuclai.pt -o ./test/output
+python src/model/micronuclai_predict.py -i ./test/test_image.tiff -m ./test/test_mask.tiff -mod ./micronuclAI_model/micronuclai.pt -o ./test/output
 ```
 
 ### Parameters and Arguments
@@ -78,10 +78,8 @@ python src/model/prediction2.py -i ./test/test_image.tiff -m ./test/test_mask.ti
 | `--size`           | `-s`       | No       | (256, 256) | List of int  | Size of images for training.                                                                      |
 | `--resizing_factor`| `-rf`      | No       | 0.6        | Float        | Resizing factor for images.                                                                       |
 | `--expansion`      | `-e`       | No       | 25         | Int          | Expansion factor for images.                                                                      |
-| `--precision`      | `-p`       | No       | 32         | String       | Precision for training. Options: `["16-mixed", "bf16-mixed", "16-true", "bf16-true", "32", "64"]` |
 | `--device`         | `-d`       | No       | "cpu"      | String       | Device to be used for training.                                                                   |
 | `--batch_size`     | `-bs`      | No       | 32         | Int          | Batch size for training.                                                                          |
-| `--workers`        | `-w`       | No       | 0          | Int          | Number of workers for training/testing.                                                           |
 
 
 ## Citation
