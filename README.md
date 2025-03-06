@@ -84,17 +84,21 @@ python src/model/micronuclai_predict.py -i ./test/test_image.tiff -m ./test/test
 
 ## Citation
 
-https://doi.org/10.1101/2024.05.24.595722
+https://doi.org/10.1038/s42003-025-07796-4
 
 ```
-@article{IbarraArellano2024,
-  title = {micronuclAI: Automated quantification of micronuclei for assessment of chromosomal instability},
-  url = {http://dx.doi.org/10.1101/2024.05.24.595722},
-  DOI = {10.1101/2024.05.24.595722},
-  publisher = {Cold Spring Harbor Laboratory},
-  author = {Ibarra-Arellano,  Miguel A. and Caprio,  Lindsay A. and Hada,  Aroj and Stotzem,  Niklas and Cai,  Luke and Shah,  Shivem and Melms,  Johannes C. and W\"{u}nneman,  Florian and Izar,  Benjamin and Schapiro,  Denis},
-  year = {2024},
-  month = may 
+@article{IbarraArellano2025,
+  title = {micronuclAI enables automated quantification of micronuclei for assessment of chromosomal instability},
+  volume = {8},
+  ISSN = {2399-3642},
+  url = {http://dx.doi.org/10.1038/s42003-025-07796-4},
+  DOI = {10.1038/s42003-025-07796-4},
+  number = {1},
+  journal = {Communications Biology},
+  publisher = {Springer Science and Business Media LLC},
+  author = {Ibarra-Arellano,  Miguel A. and Caprio,  Lindsay A. and Hada,  Aroj and Stotzem,  Niklas and Cai,  Luke L. and Shah,  Shivem B. and Walsh,  Zachary H. and Melms,  Johannes C. and W\"{u}nneman,  Florian and Bestak,  Kresimir and Mansaray,  Ibrahim and Izar,  Benjamin and Schapiro,  Denis},
+  year = {2025},
+  month = mar 
 }
 ```
 
