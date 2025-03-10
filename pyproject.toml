@@ -12,7 +12,6 @@ license = {text = "AGPL-3.0-or-later"}
 description = "Automated identification of micronuclei for chromosomal instability (CIN) quantification."
 readme = "README.md"
 classifiers = [
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -20,7 +19,7 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU Affero General Public License v3"
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "torch==2.6.0",
     "torchvision",
