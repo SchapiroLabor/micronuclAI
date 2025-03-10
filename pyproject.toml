@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "micronuclai"
+version = "0.1.0"
+authors = [
+    {name = "Miguel A. Ibarra-Arellano", email = "c180l058j@mozmail.com"}
+]
+license = {text = "AGPL-3.0-or-later"}
+description = "Automated identification of micronuclei for chromosomal instability (CIN) quantification."
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Affero General Public License v3"
+]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy==2.2.3",
+    "pandas==2.2.3",
+    "mask2bbox==0.0.23",
+    "lightning"
+]
+keywords = [
+    "chromosomal instability",
+    "cin",
+    "micronuclei",
+    "micronuclai"
+]
+
+[project.scripts]
+micronuclai-predict = "src.model.micronuclai_predict:main"
+
+[project.urls]
+Homepage = "https://github.com/SchapiroLabor/micronuclAI"
+Issues = "https://github.com/SchapiroLabor/micronuclAI/issues"
+
+
+[project.optional-dependencies]
+macos = [
+    "torch==2.6.0",
+    "torchvision"
+]
+windows-cpu =[
+    "torch==2.6.0",
+    "torchvision
+]
+linux-cpu = [
+    "torch==2.6.0 @ https://download.pytorch.org/whl/cpu",
+    "torchvision @ https://download.pytorch.org/whl/cpu"
+]
