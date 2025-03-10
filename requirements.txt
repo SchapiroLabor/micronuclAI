@@ -1,5 +1,5 @@
 mask2bbox==0.0.23
-matplotlib==3.10.1
+matplotlib
 numpy==2.2.3
 pandas==2.2.3
 Pillow==11.1.0
