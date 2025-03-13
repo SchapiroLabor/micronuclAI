@@ -37,7 +37,7 @@ keywords = [
 ]
 
 [tool.setuptools]
-packages = ["src"]
+packages = ["src", "src.model"]
 
 [project.scripts]
 micronuclai-predict = "src.model.micronuclai_predict:main"
