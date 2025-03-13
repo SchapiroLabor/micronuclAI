@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import pandas as pd
 import numpy as np
 import torchvision.models as models
-from utils import evaluate_multiclass_model, plot_confusion_matrix
+from src.model.utils import evaluate_multiclass_model, plot_confusion_matrix
 
 class EfficientNetClassifier(nn.Module):
     def __init__(self, model="efficientnet_b0", weights="IMAGENET1K_V1", out_features=1):
