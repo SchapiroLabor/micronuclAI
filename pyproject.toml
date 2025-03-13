@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "micronuclai"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
     {name = "Miguel A. Ibarra-Arellano", email = "c180l058j@mozmail.com"}
 ]
@@ -36,7 +36,7 @@ keywords = [
 ]
 
 [project.scripts]
-micronuclai-predict = "src.model.micronuclai_predict:main"
+micronuclai-predict = "micronuclai.model.micronuclai_predict:main"
 
 [project.urls]
 Homepage = "https://github.com/SchapiroLabor/micronuclAI"
