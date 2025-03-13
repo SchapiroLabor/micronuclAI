@@ -40,7 +40,7 @@ keywords = [
 where = ["src"]
 
 [project.scripts]
-micronuclai-predict = "model.micronuclai_predict:main"
+micronuclai-predict = "src.model.micronuclai_predict:main"
 
 [project.urls]
 Homepage = "https://github.com/SchapiroLabor/micronuclAI"

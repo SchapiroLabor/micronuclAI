@@ -1,6 +1,7 @@
 from model import augmentations
 # from src.model import cam
 from model import dataset
+from model import micronuclai_predict
 # from src.model import inference
 from model import logger
 # from src.model import main
