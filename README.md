@@ -31,42 +31,26 @@ https://micronuclai.streamlit.app
 
 Inference of micronuclei can be achieved in small to medium-sized example images that can be uploaded to the streamlit app. Image data is processed within a virtual machine (VM) on Heicloud, a local Cloud infrastructure provided by University Computing Center Heidelberg, and images are immediately deleted after micronuclei inference. Once micronuclei are inferred, results predictions as well as several plots describing the results are generated and presented to the user within the streamlit app which can also be downloaded as csv files. 
 
-### Local Installation 
+## Installation
 
-### Prerequisites
+We recomend to install micronuclAI in a clean environment with Python 3.10, 3.11, or 3.12.  
+micronuclAI uses PyTorch as the main deep learning framework, check the [official website](https://pytorch.org/) for the specific installation instructions for your system.
+
+### Install micronuclAI from PyPI.
+```bash
+pip install micronuclai
+```
+## Usage
 
 Two input files are required for micronuclAI
 1. Nuclei-stained Image 
-2. Associated Mask 
+2. Associated Mask
 
-### Local Installation
 
-A step by step series of examples that tell you how to get a development
-environment running locally
-
-Please ensure you have Python>=3.10 but less than Python<=3.13 installed with 
-
-``` bash
-python -version
-```
-
-Pull the repo into your local device
-
-```bash
-git clone https://github.com/SchapiroLabor/micronuclAI
-```
-Install the required libraries
-
- ``` bash
- pip install -r requirements.txt
- ```
-
-## Usage
-
-To use micronuclAI on your own images:
+You can use micronuclAI to predict micronuclei in an image using the following command:
 
 ```
-python src/model/micronuclai_predict.py -i <path/to/image> -m <path/to/mask> -mod <path/to/model> -o <path/to/output/folder>
+micronuclai-predict.py -i <path/to/image> -m <path/to/mask> -mod <path/to/model> -o <path/to/output/folder>
 ```
 
 A test dataset has been provided in the [test_data](test) folder with a [mask](test/test_mask.tiff) and its corresponding [image](test/test_image.tiff) file.
