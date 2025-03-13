@@ -7,7 +7,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/micronuclai?style=flat-square)](https://pypi.org/project/micronuclai/)
 [![PyPI - License](https://img.shields.io/pypi/l/micronuclai?style=flat-square)](https://pypi.org/project/micronuclai/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/micronuclai?style=flat-square)](https://pypi.org/project/micronuclai/)
-![Build Status](https://github.com/SchapiroLabor/microniclai/actions/workflows/build.yml/badge.svg)
+![Build Status](https://github.com/SchapiroLabor/microniclAI/actions/workflows/build.yml/badge.svg)
 
 
 **Automated assessment of Chromosomal Instability through quantification of micronuclei (MN) and Nuclear Buds (NBUDs).**
