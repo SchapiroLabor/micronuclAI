@@ -25,6 +25,7 @@ dependencies = [
     "torchvision",
     "numpy==2.2.3",
     "pandas==2.2.3",
+    "scikit_learn==1.6.1",
     "mask2bbox==0.0.23",
     "lightning==2.5.0"
 ]
@@ -35,8 +36,11 @@ keywords = [
     "micronuclai"
 ]
 
+[tool.setuptools]
+packages = ["src"]
+
 [project.scripts]
-micronuclai-predict = "model.micronuclai_predict:main"
+micronuclai-predict = "src.model.micronuclai_predict:main"
 
 [project.urls]
 Homepage = "https://github.com/SchapiroLabor/micronuclAI"

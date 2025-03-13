@@ -4,17 +4,12 @@ import argparse
 from pathlib import Path
 
 # Import external libraries
-import io
 from PIL import Image
-from torchvision import transforms
 from torch.autograd import Variable
-from torch.nn import functional as F
 import torch
 import numpy as np
 import cv2
-import json
-from torchvision import models
-from augmentations import preprocess_test as preprocess
+from src.model.augmentations import preprocess_test as preprocess
 
 
 def get_args():

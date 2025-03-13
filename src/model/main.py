@@ -3,14 +3,14 @@ import time
 from pathlib import Path
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
-from dataset import CINDataset
-from models import micronuclAI
-from augmentations import get_transforms
+from src.model.dataset import CINDataset
+from src.model.models import micronuclAI
+from src.model.augmentations import get_transforms
 from pytorch_lightning.loggers import CSVLogger
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 import argparse
-from logger import set_logger
+from src.model.logger import set_logger
 
 
 def get_args():

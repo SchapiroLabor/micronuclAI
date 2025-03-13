@@ -7,9 +7,9 @@ import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
 from torch.utils.data import DataLoader
-from dataset import micronuclAI_inference
-from augmentations import get_transforms
-from logger import set_logger
+from src.model.dataset import micronuclAI_inference
+from src.model.augmentations import get_transforms
+from src.model.logger import set_logger
 from typing import Any
 
 
