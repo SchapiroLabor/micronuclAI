@@ -1,12 +1,12 @@
-from model import augmentations
+from src.model import augmentations
 # from src.model import cam
-from model import dataset
-from model import micronuclai_predict
+from src.model import dataset
+from src.model import micronuclai_predict
 # from src.model import inference
-from model import logger
+from src.model import logger
 # from src.model import main
-from model import models
-from model import utils
+# from src.model import models
+# from src.model import utils
 # from src.utils import blur_detect
 # from src.utils import czi2ometif
 # from src.utils import extract_single_nuclei
