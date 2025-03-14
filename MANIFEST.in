@@ -1,0 +1,17 @@
+# Include important metadata files
+include README.md
+include LICENSE
+include pyproject.toml
+include requirements.txt
+
+# Include all Python files
+recursive-include src *.py
+
+# Include figures
+recursive-include images *.png
+
+# Exclude all bytecode files and .DS_Store
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude .DS_Store
