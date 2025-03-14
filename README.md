@@ -13,7 +13,7 @@
 
 ![screenshot](images/overview.png)
 
-micronuclAI is an automated pipeline for reliable quantification of micronuclei of varying size, morphology and location from nuclei-stained images. The pipeline can be divided into 3 steps: 1) segmentation, 2) nuclei isolation, and 3) quantification. In brief, single-cell crops are extracted from high-resolution microscopy images with the help of segmentation masks, which are then used to train a convolutional neural network (CNN) to output the number of MN associated with each cell. 
+micronuclAI is an automated pipeline for the reliable quantification of micronuclei of varying size, morphology and location from nuclei-stained images. The pipeline can be divided into 3 steps: 1) segmentation, 2) nuclei isolation, and 3) quantification. In brief, single-cell crops are extracted from high-resolution microscopy images with the help of segmentation masks, which are then used to train a convolutional neural network (CNN) to output the number of MN associated with each cell. 
 
 ## Getting Started
 
@@ -29,11 +29,11 @@ https://micronuclai.streamlit.app
 
 ![screenshot](images/streamlit_app.png)
 
-Inference of micronuclei can be achieved in small to medium-sized example images that can be uploaded to the streamlit app. Image data is processed within a virtual machine (VM) on Heicloud, a local Cloud infrastructure provided by University Computing Center Heidelberg, and images are immediately deleted after micronuclei inference. Once micronuclei are inferred, results predictions as well as several plots describing the results are generated and presented to the user within the streamlit app which can also be downloaded as csv files. 
+Inference of micronuclei can be achieved in small to medium-sized example images that can be uploaded to the streamlit app. Image data is processed within a virtual machine (VM) on Heicloud, a local Cloud infrastructure provided by University Computing Center Heidelberg, and images are immediately deleted after micronuclei inference. Once micronuclei are inferred, results predictions as well as several plots describing the results are generated and presented to the user within the streamlit app, which can also be downloaded as CSV files. 
 
 ## Installation
 
-We recomend to install micronuclAI in a clean environment with Python 3.10, 3.11, or 3.12.  
+We recommend installing micronuclAI in a clean environment with Python 3.10, 3.11, or 3.12.  
 micronuclAI uses PyTorch as the main deep learning framework, check the [official website](https://pytorch.org/) for the specific installation instructions for your system.
 
 ### Install micronuclAI from PyPI.
