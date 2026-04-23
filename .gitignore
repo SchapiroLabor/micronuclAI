@@ -138,3 +138,7 @@ dmypy.json
 /revision
 /figures
 /tests
+*.xlsx
+/*.csv
+/*.ipynb
+
