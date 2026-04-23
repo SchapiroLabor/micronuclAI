@@ -136,3 +136,5 @@ dmypy.json
 /documents
 /labels
 /revision
+/figures
+/tests
