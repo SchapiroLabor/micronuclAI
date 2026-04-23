@@ -130,3 +130,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Project specific
+/data
+/documents
+/labels
+/revision
