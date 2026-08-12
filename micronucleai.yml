@@ -1,0 +1,26 @@
+name: micronucleai
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - aicsimageio=4.9.4=pyhd8ed1ab_0
+  - pip:
+      - bfio==2.3.0
+      - bioformats-jar==2020.5.27
+      - cellpose==2.1.1
+      - dnspython==2.3.0
+      - email-validator==1.3.1
+      - fastremap==1.13.3
+      - jgo==1.0.5
+      - jpype1==1.4.1
+      - llvmlite==0.39.1
+      - natsort==8.2.0
+      - numba==0.56.4
+      - ome-types==0.3.2
+      - opencv-python-headless==4.7.0.68
+      - pyqt5-sip==12.11.0
+      - pyyaml==6.0
+      - scyjava==1.8.1
+      - tifffile==2023.1.23.1
